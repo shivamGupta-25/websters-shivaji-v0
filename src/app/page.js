@@ -62,16 +62,16 @@ const LoadingScreen = memo(({ progress = 0 }) => {
 
   const loadingMessages = useMemo(() => [
     { icon: <Binary className="w-5 h-5" />, text: "Initializing systems..." },
+    { icon: <Gauge className="w-5 h-5" />, text: "Optimizing performance..." },
+    { icon: <Loader2 className="w-5 h-5" />, text: "Almost there..." },
     { icon: <Code2 className="w-5 h-5" />, text: "Loading components..." },
     { icon: <Sparkles className="w-5 h-5" />, text: "Preparing interface..." },
-    { icon: <Gauge className="w-5 h-5" />, text: "Optimizing performance..." },
-    { icon: <Loader2 className="w-5 h-5" />, text: "Almost there..." }
   ], []);
 
   useEffect(() => {
     const messageInterval = setInterval(() => {
       setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(messageInterval);
   }, [loadingMessages.length]);
@@ -82,7 +82,7 @@ const LoadingScreen = memo(({ progress = 0 }) => {
         <div
           key={i}
           className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-bounce opacity-0"
-          style={{ 
+          style={{
             animationDelay: `${i * 0.15}s`,
             animationDuration: '1s',
             animation: `bounce 1s ${i * 0.15}s infinite, fade-in 0.5s ${0.3 + i * 0.1}s forwards`
@@ -115,9 +115,9 @@ const LoadingScreen = memo(({ progress = 0 }) => {
         {/* Progress Indicator */}
         <div className="space-y-4">
           <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out"
-              style={{ 
+              style={{
                 width: `${progress}%`,
                 backgroundSize: '200% 100%',
                 animation: 'gradient 2s linear infinite'
@@ -186,11 +186,10 @@ const SectionWrapper = memo(({ children, priority = false }) => {
   });
 
   return (
-    <div 
+    <div
       ref={ref}
-      className={`transition-all duration-700 transform ${
-        inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}
+      className={`transition-all duration-700 transform ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}
     >
       {inView ? children : <div className="h-32 md:h-64" />}
     </div>
@@ -200,7 +199,7 @@ const SectionWrapper = memo(({ children, priority = false }) => {
 // Scroll indicator component with proper mobile positioning
 const ScrollIndicator = memo(({ isVisible }) => {
   if (!isVisible) return null;
-  
+
   return (
     <div className="fixed bottom-8 w-full flex justify-center sm:left-1/2 sm:transform sm:-translate-x-1/2 z-50 transition-opacity duration-500 opacity-80 hover:opacity-100">
       <div className="flex flex-col items-center animate-bounce">
@@ -215,10 +214,13 @@ const ScrollIndicator = memo(({ isVisible }) => {
 
 // Main component
 export default function Home() {
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isScrollIndicatorVisible, setIsScrollIndicatorVisible] = useState(true);
   const isPreloaded = useRef(false);
+
+  // Create a unique navigation ID for this component instance
+  const navigationId = useRef(Math.random().toString(36).substring(2, 15));
 
   // Memoized sections configuration with priority settings
   const sections = useMemo(() => [
@@ -228,33 +230,33 @@ export default function Home() {
     { Component: PastEvent, key: 'past-event', priority: true },
     { Component: Council, key: 'council', priority: true }
   ], []);
-  
+
   // Memoized component list for preloading, prioritizing critical components first
   const componentsToPreload = useMemo(() => [
     // Critical components - preload first
-    Header, Footer, Banner, About,
+    PastEvent, Council, Header, Footer, Banner,
     // Secondary components - preload after critical ones
-    Workshop, PastEvent, Council
+    Workshop, About
   ], []);
 
   // Enhanced preloading strategy with prioritization
   const preloadComponents = useCallback(async () => {
     if (isPreloaded.current) return;
-    
+
     try {
       // First preload critical components (header, banner, about)
       await Promise.all(
         componentsToPreload.slice(0, 4).map(component => component.preload?.() || Promise.resolve())
       );
-      
+
       // Set progress to 80% once critical components are loaded
       setLoadingProgress(prev => Math.max(prev, 80));
-      
+
       // Then preload remaining components
       await Promise.all(
         componentsToPreload.slice(4).map(component => component.preload?.() || Promise.resolve())
       );
-      
+
       isPreloaded.current = true;
     } catch (error) {
       console.error('Error preloading components:', error);
@@ -268,7 +270,7 @@ export default function Home() {
         // Accelerate to 70% faster, then slow down
         const increment = prev < 50 ? 3 : prev < 70 ? 1.5 : prev < 90 ? 0.8 : 0.3;
         const next = prev + increment;
-        
+
         if (next >= 100) clearInterval(interval);
         return Math.min(next, 99); // Cap at 99% until actual loading completes
       });
@@ -283,26 +285,116 @@ export default function Home() {
     }
   }, [isScrollIndicatorVisible]);
 
-  // Setup loading, initialization, and preloading
+  // IMPORTANT: This effect sets up navigation detection system that works with both
+  // window.open and router navigation by storing navigation tokens
   useEffect(() => {
-    // Start preloading immediately, don't wait for timeout
-    preloadComponents();
-    
-    const progressInterval = simulateProgress();
-    
-    // Register scroll handler with throttling
-    let scrollTimeout;
-    const throttledScrollHandler = () => {
-      if (!scrollTimeout) {
-        scrollTimeout = setTimeout(() => {
-          handleScroll();
-          scrollTimeout = null;
-        }, 200); // 200ms throttle
+    // Function to store the current navigation token
+    const storeNavigationToken = () => {
+      // Make this work better with SPA router navigation
+      try {
+        // Store the current navigation ID and timestamp
+        localStorage.setItem('lastNavigationToken', navigationId.current);
+        localStorage.setItem('lastNavigationTime', Date.now().toString());
+      } catch (e) {
+        console.warn('Could not store navigation token:', e);
       }
     };
-    
-    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
-    
+
+    // Store token on mount
+    storeNavigationToken();
+
+    // Intercept navigation methods to store token before navigation
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
+
+    // Monkey patch history methods to track SPA navigation
+    window.history.pushState = function () {
+      storeNavigationToken();
+      return originalPushState.apply(this, arguments);
+    };
+
+    window.history.replaceState = function () {
+      storeNavigationToken();
+      return originalReplaceState.apply(this, arguments);
+    };
+
+    // Listen for popstate events (browser back/forward)
+    const handlePopState = () => {
+      storeNavigationToken();
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    // Track before unload
+    const handleBeforeUnload = () => {
+      storeNavigationToken();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      // Restore original methods
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // Initial loading determination - detect if this is a fresh load or navigation 
+  useEffect(() => {
+    // Get the last navigation token from storage
+    let lastNavigationToken;
+    let lastNavigationTime;
+
+    try {
+      lastNavigationToken = localStorage.getItem('lastNavigationToken');
+      lastNavigationTime = localStorage.getItem('lastNavigationTime');
+    } catch (e) {
+      console.warn('Could not read navigation token:', e);
+    }
+
+    const currentToken = navigationId.current;
+    const currentTime = Date.now();
+
+    // Check if this is a navigation within the app or a fresh page load
+    const isInternalNavigation = (
+      // If tokens match, this is probably a remount, not a fresh load
+      lastNavigationToken === currentToken ||
+      // If navigation happened very recently (within 1 second), it's likely internal navigation
+      (lastNavigationTime && (currentTime - parseInt(lastNavigationTime)) < 1000)
+    );
+
+    // Detect if this is a page refresh using performance API
+    const isRefresh = window.performance &&
+      window.performance.navigation &&
+      window.performance.navigation.type === 1;
+
+    // Show loading screen only on fresh loads and refreshes, not on internal navigation
+    if (!isInternalNavigation || isRefresh) {
+      setIsInitialLoading(true);
+    } else {
+      // Skip loading screen for internal navigation
+      setIsInitialLoading(false);
+      isPreloaded.current = true; // Assume already preloaded for internal navigation
+    }
+
+    // Update the navigation token in storage to mark this as the latest navigation
+    try {
+      localStorage.setItem('lastNavigationToken', currentToken);
+      localStorage.setItem('lastNavigationTime', currentTime.toString());
+    } catch (e) {
+      console.warn('Could not update navigation token:', e);
+    }
+  }, []);
+
+  // Setup loading, initialization, and preloading - only if isInitialLoading is true
+  useEffect(() => {
+    if (!isInitialLoading) return;
+
+    // Start preloading immediately
+    preloadComponents();
+
+    const progressInterval = simulateProgress();
+
     // Prepare for show transition
     const showTimer = setTimeout(() => {
       if (isPreloaded.current) {
@@ -319,7 +411,7 @@ export default function Home() {
             setLoadingProgress(100);
           }
         }, 500);
-        
+
         // Safety timeout - show anyway after 8 seconds
         setTimeout(() => {
           if (!isPreloaded.current) {
@@ -330,16 +422,35 @@ export default function Home() {
           }
         }, 8000);
       }
-    }, 2500); // Reduced from 3000ms
-    
+    }, 2500);
+
     return () => {
       clearTimeout(showTimer);
       clearInterval(progressInterval);
+    };
+  }, [isInitialLoading, simulateProgress, preloadComponents]);
+
+  // Register scroll handler
+  useEffect(() => {
+    // Register scroll handler with throttling
+    let scrollTimeout;
+    const throttledScrollHandler = () => {
+      if (!scrollTimeout) {
+        scrollTimeout = setTimeout(() => {
+          handleScroll();
+          scrollTimeout = null;
+        }, 200); // 200ms throttle
+      }
+    };
+
+    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
+
+    return () => {
       clearTimeout(scrollTimeout);
       window.removeEventListener('scroll', throttledScrollHandler);
     };
-  }, [simulateProgress, preloadComponents, handleScroll]);
-  
+  }, [handleScroll]);
+
   // Prefetch remaining resources after initial render
   useEffect(() => {
     if (!isInitialLoading) {
@@ -348,11 +459,37 @@ export default function Home() {
         // This would be where you'd prefetch images, additional scripts, etc.
         // Example: prefetchImages(['url1', 'url2'])
       };
-      
+
       prefetchRemainingResources();
     }
   }, [isInitialLoading]);
-  
+
+  // Add custom navigation method that works with our token system
+  const navigateTo = useCallback((path) => {
+    // Store navigation token before navigating
+    try {
+      localStorage.setItem('lastNavigationToken', navigationId.current);
+      localStorage.setItem('lastNavigationTime', Date.now().toString());
+    } catch (e) {
+      console.warn('Could not store navigation token before navigation:', e);
+    }
+
+    // Handle navigation based on what's available (router.push or window.open)
+    try {
+      // Try to use router if it exists (you would pass router as prop or use context)
+      if (window.router && typeof window.router.push === 'function') {
+        window.router.push(path);
+      } else {
+        // Fallback to window.open
+        window.open(path, '_self');
+      }
+    } catch (e) {
+      console.error('Navigation failed:', e);
+      // Last resort fallback
+      window.location.href = path;
+    }
+  }, []);
+
   // Optimized scroll to top function
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -367,10 +504,10 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
-      
+
       {/* Scroll indicator */}
       <ScrollIndicator isVisible={isScrollIndicatorVisible} />
-      
+
       <main className="flex-grow">
         {sections.map(({ Component, key, priority }) => (
           <ErrorBoundary key={key}>
@@ -380,9 +517,9 @@ export default function Home() {
           </ErrorBoundary>
         ))}
       </main>
-      
+
       {/* Back to top button */}
-      <button 
+      <button
         onClick={scrollToTop}
         className="fixed bottom-4 right-4 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 z-40"
         aria-label="Scroll to top"
@@ -391,7 +528,6 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
         </svg>
       </button>
-      
       <Footer />
     </div>
   );
