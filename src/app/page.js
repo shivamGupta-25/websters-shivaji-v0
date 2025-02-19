@@ -33,14 +33,14 @@ import React, { useState, useEffect, Suspense, lazy, useCallback, memo, useMemo,
 import { Loader2, Code2, Sparkles, Binary, Gauge } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 
-// Improve lazy loading with custom preloader
+// Keep the preloadComponent function
 const preloadComponent = (importFunc) => {
   const Component = lazy(importFunc);
   Component.preload = importFunc;
   return Component;
 };
 
-// Apply custom preloader to all components
+// Keep all component imports
 const Header = preloadComponent(() => import("./_components/Header"));
 const Footer = preloadComponent(() => import("./_components/Footer"));
 const Banner = preloadComponent(() => import("./_components/Banner"));
@@ -49,14 +49,21 @@ const Workshop = preloadComponent(() => import("./_components/Workshop"));
 const PastEvent = preloadComponent(() => import("./_components/PastEvent"));
 const Council = preloadComponent(() => import("./_components/Council"));
 
-// Memoized loading messages component
+// Enhanced LoadingMessage component
 const LoadingMessage = memo(({ icon, text }) => (
-  <div className="flex items-center justify-center space-x-2 text-gray-300 animate-fade-in transition-opacity duration-300">
-    <div className="animate-spin">{icon}</div>
-    <span className="text-sm md:text-base">{text}</span>
+  <div className="backdrop-blur-sm py-3">
+    <div className="flex items-center justify-center space-x-3 px-4">
+      <div className="text-gradient-blue-purple animate-pulse">
+        {icon}
+      </div>
+      <span className="text-sm md:text-base font-light tracking-wide text-gray-300">
+        {text}
+      </span>
+    </div>
   </div>
 ));
 
+// Enhanced LoadingScreen with new UI
 const LoadingScreen = memo(({ progress = 0 }) => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
@@ -71,50 +78,73 @@ const LoadingScreen = memo(({ progress = 0 }) => {
   useEffect(() => {
     const messageInterval = setInterval(() => {
       setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
-    }, 1000);
-
+    }, 1500);
     return () => clearInterval(messageInterval);
   }, [loadingMessages.length]);
 
-  const animatedDots = useMemo(() => (
-    <div className="flex justify-center space-x-3">
-      {[...Array(3)].map((_, i) => (
+  // Particle background component
+  const ParticleBackground = useMemo(() => (
+    <div className="absolute inset-0 overflow-hidden opacity-20">
+      {[...Array(20)].map((_, i) => (
         <div
           key={i}
-          className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-bounce opacity-0"
+          className="absolute rounded-full bg-blue-400"
           style={{
-            animationDelay: `${i * 0.15}s`,
-            animationDuration: '1s',
-            animation: `bounce 1s ${i * 0.15}s infinite, fade-in 0.5s ${0.3 + i * 0.1}s forwards`
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            width: `${Math.random() * 6 + 2}px`,
+            height: `${Math.random() * 6 + 2}px`,
+            opacity: Math.random() * 0.5 + 0.3,
+            animation: `float ${Math.random() * 10 + 15}s linear infinite`,
+            animationDelay: `${Math.random() * -15}s`,
           }}
-        ></div>
+        />
       ))}
+    </div>
+  ), []);
+
+  // Code blocks decoration
+  const CodeBlocks = useMemo(() => (
+    <div className="absolute -bottom-16 -left-16 w-64 h-64 opacity-10 rotate-12">
+      <div className="w-full h-2 bg-blue-500 mb-2 rounded-full"></div>
+      <div className="w-3/4 h-2 bg-purple-500 mb-2 rounded-full"></div>
+      <div className="w-1/2 h-2 bg-pink-500 mb-2 rounded-full"></div>
+      <div className="w-2/3 h-2 bg-blue-500 mb-2 rounded-full"></div>
+      <div className="w-1/3 h-2 bg-purple-500 rounded-full"></div>
     </div>
   ), []);
 
   return (
     <div className="fixed inset-0 flex flex-col justify-center items-center bg-black text-white z-50">
-      <div className="w-full max-w-md px-4 md:px-8 space-y-6 md:space-y-8">
+      {ParticleBackground}
+      {CodeBlocks}
+      
+      <div className="w-full max-w-md px-4 md:px-8 space-y-6 md:space-y-8 relative z-10">
         {/* Logo Container */}
-        <div className="relative p-4 overflow-visible w-full text-center animate-fade-in transition-all duration-500">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider inline-block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
+        <div className="relative p-4 overflow-visible w-full text-center animate-fade-in">
+          <div className="absolute -inset-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl animate-pulse"></div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
             WEBSTERS
           </h1>
+          <div className="absolute -right-4 -top-4 w-8 h-8">
+            <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-75"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
+          </div>
         </div>
 
-        {/* Subtitle with staggered animation */}
-        <div className="space-y-2 text-center animate-fade-in transition-all duration-500" style={{ animationDelay: '0.2s' }}>
-          <p className="text-base sm:text-lg md:text-2xl font-light">
+        {/* Subtitle */}
+        <div className="space-y-2 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="text-base sm:text-lg md:text-2xl font-light tracking-wide">
             The Computer Science Society of Shivaji College
           </p>
-          <p className="text-sm md:text-lg text-gray-400">
+          <p className="text-sm md:text-lg text-gray-400 font-light">
             University of Delhi
           </p>
         </div>
 
         {/* Progress Indicator */}
-        <div className="space-y-4">
-          <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+        <div className="space-y-4 group">
+          <div className="h-2 w-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm group-hover:h-2.5 transition-all duration-300">
             <div
               className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out"
               style={{
@@ -122,22 +152,43 @@ const LoadingScreen = memo(({ progress = 0 }) => {
                 backgroundSize: '200% 100%',
                 animation: 'gradient 2s linear infinite'
               }}
-            ></div>
+            >
+              <div className="absolute inset-0 w-full h-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
           </div>
           <div className="flex items-center justify-between text-sm md:text-base text-gray-400">
-            <span>{progress.toFixed(2)}%</span>
-            <span>Loading...</span>
+            <span className="group-hover:text-white transition-colors duration-300">{progress.toFixed(0)}%</span>
+            {/* <span className="group-hover:text-white transition-colors duration-300">Loading...</span> */}
           </div>
         </div>
 
         {/* Loading Message */}
-        <div className="transition-opacity duration-300">
-          <LoadingMessage {...loadingMessages[currentMessageIndex]} />
-        </div>
+        <LoadingMessage {...loadingMessages[currentMessageIndex]} />
 
-        {/* Animated Dots */}
-        {animatedDots}
+        {/* Animated dots */}
+        <div className="flex justify-center space-x-4 mt-8">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="relative">
+              <div
+                className="absolute inset-0 bg-blue-500/30 rounded-full blur-md animate-ping"
+                style={{
+                  animationDelay: `${i * 0.2}s`,
+                  animationDuration: '1.5s'
+                }}
+              ></div>
+              <div
+                className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce relative z-10"
+                style={{
+                  animationDelay: `${i * 0.15}s`,
+                  animationDuration: '1s'
+                }}
+              ></div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
     </div>
   );
 });
