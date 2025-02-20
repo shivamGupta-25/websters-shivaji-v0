@@ -51,12 +51,12 @@ const Council = preloadComponent(() => import("./_components/Council"));
 
 // Enhanced LoadingMessage component
 const LoadingMessage = memo(({ icon, text }) => (
-  <div className="backdrop-blur-sm py-3">
-    <div className="flex items-center justify-center space-x-3 px-4">
+  <div className="backdrop-blur-sm py-2 sm:py-3">
+    <div className="flex items-center justify-center space-x-2 sm:space-x-3 px-3 sm:px-4">
       <div className="text-gradient-blue-purple animate-pulse">
         {icon}
       </div>
-      <span className="text-sm md:text-base font-light tracking-wide text-gray-300">
+      <span className="text-xs sm:text-sm md:text-base font-light tracking-wide text-gray-300">
         {text}
       </span>
     </div>
@@ -68,11 +68,11 @@ const LoadingScreen = memo(({ progress = 0 }) => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
   const loadingMessages = useMemo(() => [
-    { icon: <Binary className="w-5 h-5" />, text: "Initializing systems..." },
-    { icon: <Gauge className="w-5 h-5" />, text: "Optimizing performance..." },
-    { icon: <Loader2 className="w-5 h-5" />, text: "Almost there..." },
-    { icon: <Code2 className="w-5 h-5" />, text: "Loading components..." },
-    { icon: <Sparkles className="w-5 h-5" />, text: "Preparing interface..." },
+    { icon: <Binary className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Initializing systems..." },
+    { icon: <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Optimizing performance..." },
+    { icon: <Loader2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Almost there..." },
+    { icon: <Code2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Loading components..." },
+    { icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Preparing interface..." },
   ], []);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const LoadingScreen = memo(({ progress = 0 }) => {
     return () => clearInterval(messageInterval);
   }, [loadingMessages.length]);
 
-  // Particle background component
+  // Responsive Particle background component
   const ParticleBackground = useMemo(() => (
     <div className="absolute inset-0 overflow-hidden opacity-20">
       {[...Array(20)].map((_, i) => (
@@ -92,8 +92,8 @@ const LoadingScreen = memo(({ progress = 0 }) => {
           style={{
             top: `${Math.random() * 100}%`,
             left: `${Math.random() * 100}%`,
-            width: `${Math.random() * 6 + 2}px`,
-            height: `${Math.random() * 6 + 2}px`,
+            width: `${Math.random() * 4 + 2}px`,
+            height: `${Math.random() * 4 + 2}px`,
             opacity: Math.random() * 0.5 + 0.3,
             animation: `float ${Math.random() * 10 + 15}s linear infinite`,
             animationDelay: `${Math.random() * -15}s`,
@@ -105,12 +105,12 @@ const LoadingScreen = memo(({ progress = 0 }) => {
 
   // Code blocks decoration
   const CodeBlocks = useMemo(() => (
-    <div className="absolute -bottom-16 -left-16 w-64 h-64 opacity-10 rotate-12">
-      <div className="w-full h-2 bg-blue-500 mb-2 rounded-full"></div>
-      <div className="w-3/4 h-2 bg-purple-500 mb-2 rounded-full"></div>
-      <div className="w-1/2 h-2 bg-pink-500 mb-2 rounded-full"></div>
-      <div className="w-2/3 h-2 bg-blue-500 mb-2 rounded-full"></div>
-      <div className="w-1/3 h-2 bg-purple-500 rounded-full"></div>
+    <div className="absolute -bottom-8 sm:-bottom-16 -left-8 sm:-left-16 w-32 sm:w-64 h-32 sm:h-64 opacity-10 rotate-12">
+      <div className="w-full h-1 sm:h-2 bg-blue-500 mb-1 sm:mb-2 rounded-full"></div>
+      <div className="w-3/4 h-1 sm:h-2 bg-purple-500 mb-1 sm:mb-2 rounded-full"></div>
+      <div className="w-1/2 h-1 sm:h-2 bg-pink-500 mb-1 sm:mb-2 rounded-full"></div>
+      <div className="w-2/3 h-1 sm:h-2 bg-blue-500 mb-1 sm:mb-2 rounded-full"></div>
+      <div className="w-1/3 h-1 sm:h-2 bg-purple-500 rounded-full"></div>
     </div>
   ), []);
 
@@ -119,32 +119,32 @@ const LoadingScreen = memo(({ progress = 0 }) => {
       {ParticleBackground}
       {CodeBlocks}
       
-      <div className="w-full max-w-md px-4 md:px-8 space-y-6 md:space-y-8 relative z-10">
+      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md px-3 sm:px-4 md:px-8 space-y-4 sm:space-y-6 md:space-y-8 relative z-10">
         {/* Logo Container */}
-        <div className="relative p-4 overflow-visible w-full text-center animate-fade-in">
-          <div className="absolute -inset-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl animate-pulse"></div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
+        <div className="relative p-3 sm:p-4 overflow-visible w-full text-center animate-fade-in">
+          <div className="absolute -inset-8 sm:-inset-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl animate-pulse"></div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold tracking-wider bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
             WEBSTERS
           </h1>
-          <div className="absolute -right-4 -top-4 w-8 h-8">
+          <div className="absolute -right-2 sm:-right-4 -top-2 sm:-top-4 w-4 sm:w-8 h-4 sm:h-8">
             <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-75"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
           </div>
         </div>
 
         {/* Subtitle */}
-        <div className="space-y-2 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <p className="text-base sm:text-lg md:text-2xl font-light tracking-wide">
+        <div className="space-y-1 sm:space-y-2 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="text-sm sm:text-base md:text-2xl font-light tracking-wide">
             The Computer Science Society of Shivaji College
           </p>
-          <p className="text-sm md:text-lg text-gray-400 font-light">
+          <p className="text-xs sm:text-sm md:text-lg text-gray-400 font-light">
             University of Delhi
           </p>
         </div>
 
         {/* Progress Indicator */}
-        <div className="space-y-4 group">
-          <div className="h-2 w-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm group-hover:h-2.5 transition-all duration-300">
+        <div className="space-y-3 sm:space-y-4 group">
+          <div className="h-1.5 sm:h-2 w-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm group-hover:h-2 sm:group-hover:h-2.5 transition-all duration-300">
             <div
               className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out"
               style={{
@@ -156,17 +156,16 @@ const LoadingScreen = memo(({ progress = 0 }) => {
               <div className="absolute inset-0 w-full h-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           </div>
-          <div className="flex items-center justify-between text-sm md:text-base text-gray-400">
+          <div className="flex items-center justify-between text-xs sm:text-sm md:text-base text-gray-400">
             <span className="group-hover:text-white transition-colors duration-300">{progress.toFixed(0)}%</span>
-            {/* <span className="group-hover:text-white transition-colors duration-300">Loading...</span> */}
+            <span className="group-hover:text-white transition-colors duration-300">Loading...</span>
           </div>
         </div>
-
         {/* Loading Message */}
         <LoadingMessage {...loadingMessages[currentMessageIndex]} />
 
         {/* Animated dots */}
-        <div className="flex justify-center space-x-4 mt-8">
+        <div className="flex justify-center space-x-2 sm:space-x-4 mt-4 sm:mt-8">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="relative">
               <div
@@ -177,7 +176,7 @@ const LoadingScreen = memo(({ progress = 0 }) => {
                 }}
               ></div>
               <div
-                className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce relative z-10"
+                className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce relative z-10"
                 style={{
                   animationDelay: `${i * 0.15}s`,
                   animationDuration: '1s'
