@@ -1,7 +1,7 @@
 "use client";
 
 // This Below code is Without Loading Screen 
-
+{/* <>
   import Header from "./_components/Header";
   import Footer from "./_components/Footer";
   import Banner from "./_components/Banner";
@@ -26,562 +26,344 @@
   </>
   );
 }
+</> */}
 
+// This Below code is With Loading Screen 
 
-// <>
-// // With Loading Screen
-// import React, { useState, useEffect, Suspense, lazy, useCallback, memo, useMemo, useRef } from "react";
-// import { Loader2, Code2, Sparkles, Binary, Gauge } from "lucide-react";
-// import { useInView } from "react-intersection-observer";
+import { useCallback, useState, useEffect, memo, useMemo } from "react";
+import { Loader2, Code2, Sparkles, Binary, Gauge } from "lucide-react";
+import dynamic from 'next/dynamic';
+import Header from "./_components/Header";
+import Footer from "./_components/Footer";
+import Banner from "./_components/Banner";
+import About from "./_components/About";
+import Workshop from "./_components/Workshop";
+import PastEvent from "./_components/PastEvent";
+import Council from "./_components/Council";
 
-// // Keep the preloadComponent function
-// const preloadComponent = (importFunc) => {
-//   const Component = lazy(importFunc);
-//   Component.preload = importFunc;
-//   return Component;
-// };
+// Enhanced LoadingMessage component
+const LoadingMessage = memo(({ icon, text }) => (
+  <div className="backdrop-blur-sm py-2 sm:py-3">
+    <div className="flex items-center justify-center space-x-2 sm:space-x-3 px-3 sm:px-4">
+      <div className="text-gradient-blue-purple animate-pulse">
+        {icon}
+      </div>
+      <span className="text-xs sm:text-sm md:text-base font-light tracking-wide text-gray-300">
+        {text}
+      </span>
+    </div>
+  </div>
+));
 
-// // Keep all component imports
-// const Header = preloadComponent(() => import("./_components/Header"));
-// const Footer = preloadComponent(() => import("./_components/Footer"));
-// const Banner = preloadComponent(() => import("./_components/Banner"));
-// const About = preloadComponent(() => import("./_components/About"));
-// const Workshop = preloadComponent(() => import("./_components/Workshop"));
-// const PastEvent = preloadComponent(() => import("./_components/PastEvent"));
-// const Council = preloadComponent(() => import("./_components/Council"));
+// Particles generator component
+const ParticlesBackground = memo(() => {
+  const [particles, setParticles] = useState([]);
+  
+  useEffect(() => {
+    const newParticles = Array(20).fill().map(() => ({
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      width: `${Math.random() * 4 + 2}px`,
+      height: `${Math.random() * 4 + 2}px`,
+      opacity: Math.random() * 0.5 + 0.3,
+      animationDuration: `${Math.random() * 10 + 15}s`,
+      animationDelay: `${Math.random() * -15}s`,
+    }));
+    setParticles(newParticles);
+  }, []);
 
-// // Enhanced LoadingMessage component
-// const LoadingMessage = memo(({ icon, text }) => (
-//   <div className="backdrop-blur-sm py-2 sm:py-3">
-//     <div className="flex items-center justify-center space-x-2 sm:space-x-3 px-3 sm:px-4">
-//       <div className="text-gradient-blue-purple animate-pulse">
-//         {icon}
-//       </div>
-//       <span className="text-xs sm:text-sm md:text-base font-light tracking-wide text-gray-300">
-//         {text}
-//       </span>
-//     </div>
-//   </div>
-// ));
+  return (
+    <div className="absolute inset-0 overflow-hidden opacity-20">
+      {particles.map((style, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full bg-blue-400"
+          style={{
+            top: style.top,
+            left: style.left,
+            width: style.width,
+            height: style.height,
+            opacity: style.opacity,
+            animation: `float ${style.animationDuration} linear infinite`,
+            animationDelay: style.animationDelay,
+          }}
+        />
+      ))}
+    </div>
+  );
+});
 
-// // Enhanced LoadingScreen with new UI
-// const LoadingScreen = memo(({ progress = 0 }) => {
-//   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+// Logo component 
+const Logo = memo(() => (
+  <div className="relative p-3 sm:p-4 overflow-visible w-full text-center animate-fade-in">
+    <div className="absolute -inset-8 sm:-inset-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl animate-pulse"></div>
+    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold tracking-wider bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+      WEBSTERS
+    </h1>
+    <div className="absolute -right-2 sm:-right-4 -top-2 sm:-top-4 w-4 sm:w-8 h-4 sm:h-8">
+      <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-75"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
+    </div>
+  </div>
+));
 
-//   const loadingMessages = useMemo(() => [
-//     { icon: <Binary className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Initializing systems..." },
-//     { icon: <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Optimizing performance..." },
-//     { icon: <Loader2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Almost there..." },
-//     { icon: <Code2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Loading components..." },
-//     { icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Preparing interface..." },
-//   ], []);
+// Progress indicator component
+const ProgressIndicator = memo(({ progress }) => (
+  <div className="space-y-3 sm:space-y-4 group">
+    <div className="h-1.5 sm:h-2 w-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm group-hover:h-2 sm:group-hover:h-2.5 transition-all duration-300">
+      <div
+        className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+    <div className="flex items-center justify-between text-xs sm:text-sm md:text-base text-gray-400">
+      <span className="group-hover:text-white transition-colors duration-300">{progress.toFixed(0)}%</span>
+      <span className="group-hover:text-white transition-colors duration-300">Loading...</span>
+    </div>
+  </div>
+));
 
-//   useEffect(() => {
-//     const messageInterval = setInterval(() => {
-//       setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
-//     }, 1500);
-//     return () => clearInterval(messageInterval);
-//   }, [loadingMessages.length]);
+// Dot animation component
+const AnimatedDots = memo(() => (
+  <div className="flex justify-center space-x-2 sm:space-x-4 mt-4 sm:mt-8">
+    {[0, 1, 2].map((i) => (
+      <div key={i} className="relative">
+        <div
+          className="absolute inset-0 bg-blue-500/30 rounded-full blur-md animate-ping"
+          style={{ animationDelay: `${i * 0.2}s` }}
+        />
+        <div
+          className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s` }}
+        />
+      </div>
+    ))}
+  </div>
+));
 
-//   // Responsive Particle background component
-//   const ParticleBackground = useMemo(() => (
-//     <div className="absolute inset-0 overflow-hidden opacity-20">
-//       {[...Array(20)].map((_, i) => (
-//         <div
-//           key={i}
-//           className="absolute rounded-full bg-blue-400"
-//           style={{
-//             top: `${Math.random() * 100}%`,
-//             left: `${Math.random() * 100}%`,
-//             width: `${Math.random() * 4 + 2}px`,
-//             height: `${Math.random() * 4 + 2}px`,
-//             opacity: Math.random() * 0.5 + 0.3,
-//             animation: `float ${Math.random() * 10 + 15}s linear infinite`,
-//             animationDelay: `${Math.random() * -15}s`,
-//           }}
-//         />
-//       ))}
-//     </div>
-//   ), []);
+// Enhanced LoadingScreen with client-side only rendering
+const LoadingScreenComponent = memo(({ progress = 0, children }) => {
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
-//   // Code blocks decoration
-//   const CodeBlocks = useMemo(() => (
-//     <div className="absolute -bottom-8 sm:-bottom-16 -left-8 sm:-left-16 w-32 sm:w-64 h-32 sm:h-64 opacity-10 rotate-12">
-//       <div className="w-full h-1 sm:h-2 bg-blue-500 mb-1 sm:mb-2 rounded-full"></div>
-//       <div className="w-3/4 h-1 sm:h-2 bg-purple-500 mb-1 sm:mb-2 rounded-full"></div>
-//       <div className="w-1/2 h-1 sm:h-2 bg-pink-500 mb-1 sm:mb-2 rounded-full"></div>
-//       <div className="w-2/3 h-1 sm:h-2 bg-blue-500 mb-1 sm:mb-2 rounded-full"></div>
-//       <div className="w-1/3 h-1 sm:h-2 bg-purple-500 rounded-full"></div>
-//     </div>
-//   ), []);
+  const loadingMessages = useMemo(() => [
+    { icon: <Binary className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Initializing systems..." },
+    { icon: <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Optimizing performance..." },
+    { icon: <Loader2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Almost there..." },
+    { icon: <Code2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Loading components..." },
+    { icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Preparing interface..." },
+  ], []);
 
-//   return (
-//     <div className="fixed inset-0 flex flex-col justify-center items-center bg-black text-white z-50">
-//       {ParticleBackground}
-//       {CodeBlocks}
+  // Set message rotation interval
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
+    }, 1500);
+    return () => clearInterval(messageInterval);
+  }, [loadingMessages.length]);
+
+  return (
+    <div className="fixed inset-0 flex flex-col justify-center items-center bg-black text-white z-50">
+      <ParticlesBackground />
       
-//       <div className="w-full max-w-xs sm:max-w-sm md:max-w-md px-3 sm:px-4 md:px-8 space-y-4 sm:space-y-6 md:space-y-8 relative z-10">
-//         {/* Logo Container */}
-//         <div className="relative p-3 sm:p-4 overflow-visible w-full text-center animate-fade-in">
-//           <div className="absolute -inset-8 sm:-inset-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl animate-pulse"></div>
-//           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold tracking-wider bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
-//             WEBSTERS
-//           </h1>
-//           <div className="absolute -right-2 sm:-right-4 -top-2 sm:-top-4 w-4 sm:w-8 h-4 sm:h-8">
-//             <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-75"></div>
-//             <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"></div>
-//           </div>
-//         </div>
+      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md px-3 sm:px-4 md:px-8 space-y-4 sm:space-y-6 md:space-y-8 relative z-10">
+        {/* Logo Container */}
+        <Logo />
 
-//         {/* Subtitle */}
-//         <div className="space-y-1 sm:space-y-2 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
-//           <p className="text-sm sm:text-base md:text-2xl font-light tracking-wide">
-//             The Computer Science Society of Shivaji College
-//           </p>
-//           <p className="text-xs sm:text-sm md:text-lg text-gray-400 font-light">
-//             University of Delhi
-//           </p>
-//         </div>
+        {/* Subtitle */}
+        <div className="space-y-1 sm:space-y-2 text-center">
+          <p className="text-sm sm:text-base md:text-2xl font-light tracking-wide">
+            The Computer Science Society of Shivaji College
+          </p>
+          <p className="text-xs sm:text-sm md:text-lg text-gray-400 font-light">
+            University of Delhi
+          </p>
+        </div>
 
-//         {/* Progress Indicator */}
-//         <div className="space-y-3 sm:space-y-4 group">
-//           <div className="h-1.5 sm:h-2 w-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm group-hover:h-2 sm:group-hover:h-2.5 transition-all duration-300">
-//             <div
-//               className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out"
-//               style={{
-//                 width: `${progress}%`,
-//                 backgroundSize: '200% 100%',
-//                 animation: 'gradient 2s linear infinite'
-//               }}
-//             >
-//               <div className="absolute inset-0 w-full h-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-//             </div>
-//           </div>
-//           <div className="flex items-center justify-between text-xs sm:text-sm md:text-base text-gray-400">
-//             <span className="group-hover:text-white transition-colors duration-300">{progress.toFixed(0)}%</span>
-//             <span className="group-hover:text-white transition-colors duration-300">Loading...</span>
-//           </div>
-//         </div>
-//         {/* Loading Message */}
-//         <LoadingMessage {...loadingMessages[currentMessageIndex]} />
+        {/* Progress Indicator */}
+        <ProgressIndicator progress={progress} />
 
-//         {/* Animated dots */}
-//         <div className="flex justify-center space-x-2 sm:space-x-4 mt-4 sm:mt-8">
-//           {[...Array(3)].map((_, i) => (
-//             <div key={i} className="relative">
-//               <div
-//                 className="absolute inset-0 bg-blue-500/30 rounded-full blur-md animate-ping"
-//                 style={{
-//                   animationDelay: `${i * 0.2}s`,
-//                   animationDuration: '1.5s'
-//                 }}
-//               ></div>
-//               <div
-//                 className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-bounce relative z-10"
-//                 style={{
-//                   animationDelay: `${i * 0.15}s`,
-//                   animationDuration: '1s'
-//                 }}
-//               ></div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
+        {/* Loading Message */}
+        <LoadingMessage {...loadingMessages[currentMessageIndex]} />
 
-//       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
-//     </div>
-//   );
-// });
+        {/* Animated dots */}
+        <AnimatedDots />
+      </div>
+      
+      {/* Hidden div to preload components */}
+      <div className="hidden">{children}</div>
+    </div>
+  );
+});
 
-// // Optimized Error Boundary Component with reset capability
-// class ErrorBoundary extends React.Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = { hasError: false };
-//   }
+// Client-side only loading screen to prevent hydration mismatch
+const LoadingScreen = dynamic(() => Promise.resolve(LoadingScreenComponent), {
+  ssr: false
+});
 
-//   static getDerivedStateFromError() {
-//     return { hasError: true };
-//   }
+// Preload main content components
+const PreloadedMainContent = memo(() => (
+  <div style={{ display: 'none' }}>
+    <Header />
+    <Banner />
+    <About />
+    <Workshop />
+    <PastEvent />
+    <Council />
+    <Footer />
+  </div>
+));
 
-//   componentDidCatch(error, errorInfo) {
-//     console.error('Error loading component:', error, errorInfo);
-//   }
+// Scroll indicator component
+const ScrollIndicator = memo(({ visible }) => (
+  <div 
+    className={`fixed bottom-8 w-full flex justify-center sm:left-1/2 sm:transform sm:-translate-x-1/2 z-50 transition-opacity duration-500 ${
+      visible ? 'opacity-80 hover:opacity-100' : 'opacity-0 pointer-events-none'
+    }`}
+  >
+    <div className="flex flex-col items-center animate-bounce">
+      <span className="text-sm text-gray-600 mb-1 text-center px-4">
+        Scroll to explore
+      </span>
+      <svg 
+        className="w-5 h-5 text-blue-500" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+        />
+      </svg>
+    </div>
+  </div>
+));
 
-//   render() {
-//     if (this.state.hasError) {
-//       return (
-//         <div className="p-6 bg-red-50 rounded-lg shadow-sm my-4 text-center transition-all duration-300">
-//           <h3 className="text-lg font-medium text-red-600">Something went wrong</h3>
-//           <p className="mt-2 text-sm text-red-500">We couldn't load this component</p>
-//           <button
-//             className="mt-3 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
-//             onClick={() => this.setState({ hasError: false })}
-//           >
-//             Try again
-//           </button>
-//         </div>
-//       );
-//     }
+// Scroll to top button
+const ScrollToTopButton = memo(({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="fixed bottom-4 right-4 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 z-40"
+    aria-label="Scroll to top"
+  >
+    <svg 
+      className="w-5 h-5" 
+      fill="none" 
+      viewBox="0 0 24 24" 
+      stroke="currentColor"
+    >
+      <path 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        strokeWidth={2} 
+        d="M5 10l7-7m0 0l7 7m-7-7v18" 
+      />
+    </svg>
+  </button>
+));
 
-//     return this.props.children;
-//   }
-// }
+// Loading and progress state hook
+const useLoading = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [componentsPreloaded, setComponentsPreloaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-// // Further optimized section wrapper with improved threshold settings
-// const SectionWrapper = memo(({ children, priority = false }) => {
-//   const { ref, inView } = useInView({
-//     threshold: priority ? 0 : 0.1,
-//     triggerOnce: true,
-//     rootMargin: priority ? '0px' : '100px',
-//   });
+  // Handle client-side mounting
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-//   return (
-//     <div
-//       ref={ref}
-//       className={`transition-all duration-700 transform ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-//         }`}
-//     >
-//       {inView ? children : <div className="h-32 md:h-64" />}
-//     </div>
-//   );
-// });
+  // Preload components while showing loading animation
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    // Start the loading animation
+    const loadingTimer = setInterval(() => {
+      setProgress(prev => {
+        // Slow down progress at certain points to ensure components load
+        if (prev < 30) return Math.min(prev + 2, 30);
+        if (prev < 60 && !componentsPreloaded) return Math.min(prev + 0.5, 60);
+        if (prev >= 100) {
+          clearInterval(loadingTimer);
+          setTimeout(() => setIsLoading(false), 500);
+          return 100;
+        }
+        return Math.min(prev + 3, 100);
+      });
+    }, 50);
 
-// // Scroll indicator component with proper mobile positioning
-// const ScrollIndicator = memo(({ isVisible }) => {
-//   if (!isVisible) return null;
+    // Preload components after a small delay
+    const preloadTimer = setTimeout(() => {
+      // Mark components as preloaded after giving them time to initialize
+      setComponentsPreloaded(true);
+    }, 800);
 
-//   return (
-//     <div className="fixed bottom-8 w-full flex justify-center sm:left-1/2 sm:transform sm:-translate-x-1/2 z-50 transition-opacity duration-500 opacity-80 hover:opacity-100">
-//       <div className="flex flex-col items-center animate-bounce">
-//         <span className="text-sm text-gray-600 mb-1 text-center px-4">Scroll to explore</span>
-//         <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-//         </svg>
-//       </div>
-//     </div>
-//   );
-// });
+    return () => {
+      clearInterval(loadingTimer);
+      clearTimeout(preloadTimer);
+    };
+  }, [isMounted, componentsPreloaded]);
 
-// // Main component
-// export default function Home() {
-//   const [isInitialLoading, setIsInitialLoading] = useState(false);
-//   const [loadingProgress, setLoadingProgress] = useState(0);
-//   const [isScrollIndicatorVisible, setIsScrollIndicatorVisible] = useState(true);
-//   const isPreloaded = useRef(false);
+  return { isLoading, progress, isMounted };
+};
 
-//   // Create a unique navigation ID for this component instance
-//   const navigationId = useRef(Math.random().toString(36).substring(2, 15));
+// Hook for scroll indicator visibility
+const useScrollIndicator = (isMounted) => {
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
-//   // Memoized sections configuration with priority settings
-//   const sections = useMemo(() => [
-//     { Component: Banner, key: 'banner', priority: true },
-//     { Component: About, key: 'about', priority: false },
-//     { Component: Workshop, key: 'workshop', priority: false },
-//     { Component: PastEvent, key: 'past-event', priority: true },
-//     { Component: Council, key: 'council', priority: true }
-//   ], []);
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const handleScroll = () => {
+      const shouldShow = window.scrollY < 100;
+      setShowScrollIndicator(shouldShow);
+    };
 
-//   // Memoized component list for preloading, prioritizing critical components first
-//   const componentsToPreload = useMemo(() => [
-//     // Critical components - preload first
-//     PastEvent, Council, Header, Footer, Banner,
-//     // Secondary components - preload after critical ones
-//     Workshop, About
-//   ], []);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMounted]);
 
-//   // Enhanced preloading strategy with prioritization
-//   const preloadComponents = useCallback(async () => {
-//     if (isPreloaded.current) return;
+  return showScrollIndicator;
+};
 
-//     try {
-//       // First preload critical components (header, banner, about)
-//       await Promise.all(
-//         componentsToPreload.slice(0, 4).map(component => component.preload?.() || Promise.resolve())
-//       );
+export default function Home() {
+  const { isLoading, progress, isMounted } = useLoading();
+  const showScrollIndicator = useScrollIndicator(isMounted);
+  
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
-//       // Set progress to 80% once critical components are loaded
-//       setLoadingProgress(prev => Math.max(prev, 80));
+  // Return minimal SSR placeholder before hydration
+  if (!isMounted) {
+    return <div className="min-h-screen bg-black"></div>;
+  }
 
-//       // Then preload remaining components
-//       await Promise.all(
-//         componentsToPreload.slice(4).map(component => component.preload?.() || Promise.resolve())
-//       );
+  if (isLoading && isMounted) {
+    return (
+      <LoadingScreen progress={progress}>
+        <PreloadedMainContent />
+      </LoadingScreen>
+    );
+  }
 
-//       isPreloaded.current = true;
-//     } catch (error) {
-//       console.error('Error preloading components:', error);
-//     }
-//   }, [componentsToPreload]);
-
-//   // Enhanced progress simulation with faster initial loading
-//   const simulateProgress = useCallback(() => {
-//     const interval = setInterval(() => {
-//       setLoadingProgress(prev => {
-//         // Accelerate to 70% faster, then slow down
-//         const increment = prev < 50 ? 3 : prev < 70 ? 1.5 : prev < 90 ? 0.8 : 0.3;
-//         const next = prev + increment;
-
-//         if (next >= 100) clearInterval(interval);
-//         return Math.min(next, 99); // Cap at 99% until actual loading completes
-//       });
-//     }, 30);
-//     return interval;
-//   }, []);
-
-//   // Optimized scroll handler with throttling
-//   const handleScroll = useCallback(() => {
-//     if (window.scrollY > 100 && isScrollIndicatorVisible) {
-//       setIsScrollIndicatorVisible(false);
-//     }
-//   }, [isScrollIndicatorVisible]);
-
-//   // IMPORTANT: This effect sets up navigation detection system that works with both
-//   // window.open and router navigation by storing navigation tokens
-//   useEffect(() => {
-//     // Function to store the current navigation token
-//     const storeNavigationToken = () => {
-//       // Make this work better with SPA router navigation
-//       try {
-//         // Store the current navigation ID and timestamp
-//         localStorage.setItem('lastNavigationToken', navigationId.current);
-//         localStorage.setItem('lastNavigationTime', Date.now().toString());
-//       } catch (e) {
-//         console.warn('Could not store navigation token:', e);
-//       }
-//     };
-
-//     // Store token on mount
-//     storeNavigationToken();
-
-//     // Intercept navigation methods to store token before navigation
-//     const originalPushState = window.history.pushState;
-//     const originalReplaceState = window.history.replaceState;
-
-//     // Monkey patch history methods to track SPA navigation
-//     window.history.pushState = function () {
-//       storeNavigationToken();
-//       return originalPushState.apply(this, arguments);
-//     };
-
-//     window.history.replaceState = function () {
-//       storeNavigationToken();
-//       return originalReplaceState.apply(this, arguments);
-//     };
-
-//     // Listen for popstate events (browser back/forward)
-//     const handlePopState = () => {
-//       storeNavigationToken();
-//     };
-//     window.addEventListener('popstate', handlePopState);
-
-//     // Track before unload
-//     const handleBeforeUnload = () => {
-//       storeNavigationToken();
-//     };
-//     window.addEventListener('beforeunload', handleBeforeUnload);
-
-//     return () => {
-//       // Restore original methods
-//       window.history.pushState = originalPushState;
-//       window.history.replaceState = originalReplaceState;
-//       window.removeEventListener('popstate', handlePopState);
-//       window.removeEventListener('beforeunload', handleBeforeUnload);
-//     };
-//   }, []);
-
-//   // Initial loading determination - detect if this is a fresh load or navigation 
-//   useEffect(() => {
-//     // Get the last navigation token from storage
-//     let lastNavigationToken;
-//     let lastNavigationTime;
-
-//     try {
-//       lastNavigationToken = localStorage.getItem('lastNavigationToken');
-//       lastNavigationTime = localStorage.getItem('lastNavigationTime');
-//     } catch (e) {
-//       console.warn('Could not read navigation token:', e);
-//     }
-
-//     const currentToken = navigationId.current;
-//     const currentTime = Date.now();
-
-//     // Check if this is a navigation within the app or a fresh page load
-//     const isInternalNavigation = (
-//       // If tokens match, this is probably a remount, not a fresh load
-//       lastNavigationToken === currentToken ||
-//       // If navigation happened very recently (within 1 second), it's likely internal navigation
-//       (lastNavigationTime && (currentTime - parseInt(lastNavigationTime)) < 1000)
-//     );
-
-//     // Detect if this is a page refresh using performance API
-//     const isRefresh = window.performance &&
-//       window.performance.navigation &&
-//       window.performance.navigation.type === 1;
-
-//     // Show loading screen only on fresh loads and refreshes, not on internal navigation
-//     if (!isInternalNavigation || isRefresh) {
-//       setIsInitialLoading(true);
-//     } else {
-//       // Skip loading screen for internal navigation
-//       setIsInitialLoading(false);
-//       isPreloaded.current = true; // Assume already preloaded for internal navigation
-//     }
-
-//     // Update the navigation token in storage to mark this as the latest navigation
-//     try {
-//       localStorage.setItem('lastNavigationToken', currentToken);
-//       localStorage.setItem('lastNavigationTime', currentTime.toString());
-//     } catch (e) {
-//       console.warn('Could not update navigation token:', e);
-//     }
-//   }, []);
-
-//   // Setup loading, initialization, and preloading - only if isInitialLoading is true
-//   useEffect(() => {
-//     if (!isInitialLoading) return;
-
-//     // Start preloading immediately
-//     preloadComponents();
-
-//     const progressInterval = simulateProgress();
-
-//     // Prepare for show transition
-//     const showTimer = setTimeout(() => {
-//       if (isPreloaded.current) {
-//         setIsInitialLoading(false);
-//         clearInterval(progressInterval);
-//         setLoadingProgress(100);
-//       } else {
-//         // If not preloaded yet, check again in 500ms
-//         const checkPreloadInterval = setInterval(() => {
-//           if (isPreloaded.current) {
-//             setIsInitialLoading(false);
-//             clearInterval(progressInterval);
-//             clearInterval(checkPreloadInterval);
-//             setLoadingProgress(100);
-//           }
-//         }, 500);
-
-//         // Safety timeout - show anyway after 8 seconds
-//         setTimeout(() => {
-//           if (!isPreloaded.current) {
-//             setIsInitialLoading(false);
-//             clearInterval(progressInterval);
-//             clearInterval(checkPreloadInterval);
-//             setLoadingProgress(100);
-//           }
-//         }, 8000);
-//       }
-//     }, 2500);
-
-//     return () => {
-//       clearTimeout(showTimer);
-//       clearInterval(progressInterval);
-//     };
-//   }, [isInitialLoading, simulateProgress, preloadComponents]);
-
-//   // Register scroll handler
-//   useEffect(() => {
-//     // Register scroll handler with throttling
-//     let scrollTimeout;
-//     const throttledScrollHandler = () => {
-//       if (!scrollTimeout) {
-//         scrollTimeout = setTimeout(() => {
-//           handleScroll();
-//           scrollTimeout = null;
-//         }, 200); // 200ms throttle
-//       }
-//     };
-
-//     window.addEventListener('scroll', throttledScrollHandler, { passive: true });
-
-//     return () => {
-//       clearTimeout(scrollTimeout);
-//       window.removeEventListener('scroll', throttledScrollHandler);
-//     };
-//   }, [handleScroll]);
-
-//   // Prefetch remaining resources after initial render
-//   useEffect(() => {
-//     if (!isInitialLoading) {
-//       // Prefetch any remaining assets or components
-//       const prefetchRemainingResources = async () => {
-//         // This would be where you'd prefetch images, additional scripts, etc.
-//         // Example: prefetchImages(['url1', 'url2'])
-//       };
-
-//       prefetchRemainingResources();
-//     }
-//   }, [isInitialLoading]);
-
-//   // Add custom navigation method that works with our token system
-//   const navigateTo = useCallback((path) => {
-//     // Store navigation token before navigating
-//     try {
-//       localStorage.setItem('lastNavigationToken', navigationId.current);
-//       localStorage.setItem('lastNavigationTime', Date.now().toString());
-//     } catch (e) {
-//       console.warn('Could not store navigation token before navigation:', e);
-//     }
-
-//     // Handle navigation based on what's available (router.push or window.open)
-//     try {
-//       // Try to use router if it exists (you would pass router as prop or use context)
-//       if (window.router && typeof window.router.push === 'function') {
-//         window.router.push(path);
-//       } else {
-//         // Fallback to window.open
-//         window.open(path, '_self');
-//       }
-//     } catch (e) {
-//       console.error('Navigation failed:', e);
-//       // Last resort fallback
-//       window.location.href = path;
-//     }
-//   }, []);
-
-//   // Optimized scroll to top function
-//   const scrollToTop = useCallback(() => {
-//     window.scrollTo({ top: 0, behavior: 'smooth' });
-//   }, []);
-
-//   // Render loading screen
-//   if (isInitialLoading) {
-//     return <LoadingScreen progress={loadingProgress} />;
-//   }
-
-//   // Main page render with optimized component loading - removed loading indicators
-//   return (
-//     <div className="min-h-screen flex flex-col bg-white">
-//       <Header />
-
-//       {/* Scroll indicator */}
-//       <ScrollIndicator isVisible={isScrollIndicatorVisible} />
-
-//       <main className="flex-grow">
-//         {sections.map(({ Component, key, priority }) => (
-//           <ErrorBoundary key={key}>
-//             <SectionWrapper priority={priority}>
-//               <Component />
-//             </SectionWrapper>
-//           </ErrorBoundary>
-//         ))}
-//       </main>
-
-//       {/* Back to top button */}
-//       <button
-//         onClick={scrollToTop}
-//         className="fixed bottom-4 right-4 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 z-40"
-//         aria-label="Scroll to top"
-//       >
-//         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-//         </svg>
-//       </button>
-//       <Footer />
-//     </div>
-//   );
-// }
-
-// </>
+  return (
+    <>
+      <Header />
+      <main>
+        <Banner />
+        <About />
+        <Workshop />
+        <PastEvent />
+        <Council />
+        
+        <ScrollIndicator visible={showScrollIndicator} />
+        <ScrollToTopButton onClick={scrollToTop} />
+      </main>
+      <Footer />
+    </>
+  );
+}
