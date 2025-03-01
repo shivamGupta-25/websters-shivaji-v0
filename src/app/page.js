@@ -1,38 +1,11 @@
 "use client";
 
-// This Below code is Without Loading Screen 
-{/* <>
-  import Header from "./_components/Header";
-  import Footer from "./_components/Footer";
-  import Banner from "./_components/Banner";
-  import About from "./_components/About";
-  import Workshop from "./_components/Workshop";
-  import PastEvent from "./_components/PastEvent";
-  import Council from "./_components/Council";
-
-  export default function Home() {
-  return (
-  <>
-    <Header>
-      <main>
-        <Banner />
-        <About />
-        <Workshop />
-        <PastEvent />
-        <Council />
-      </main>
-    </Header>
-    <Footer />
-  </>
-  );
-}
-</> */}
-
-// This Below code is With Loading Screen 
-
-import { useCallback, useState, useEffect, memo, useMemo } from "react";
+import { useCallback, useState, useEffect, memo } from "react";
+import { usePathname } from 'next/navigation';
 import { Loader2, Code2, Sparkles, Binary, Gauge } from "lucide-react";
 import dynamic from 'next/dynamic';
+
+// Component imports - consider using dynamic imports for these if they're large
 import Header from "./_components/Header";
 import Footer from "./_components/Footer";
 import Banner from "./_components/Banner";
@@ -41,26 +14,23 @@ import Workshop from "./_components/Workshop";
 import PastEvent from "./_components/PastEvent";
 import Council from "./_components/Council";
 
-// Enhanced LoadingMessage component
+// Optimized UI components
 const LoadingMessage = memo(({ icon, text }) => (
   <div className="backdrop-blur-sm py-2 sm:py-3">
     <div className="flex items-center justify-center space-x-2 sm:space-x-3 px-3 sm:px-4">
-      <div className="text-gradient-blue-purple animate-pulse">
-        {icon}
-      </div>
-      <span className="text-xs sm:text-sm md:text-base font-light tracking-wide text-gray-300">
-        {text}
-      </span>
+      <div className="text-gradient-blue-purple animate-pulse">{icon}</div>
+      <span className="text-xs sm:text-sm md:text-base font-light tracking-wide text-gray-300">{text}</span>
     </div>
   </div>
 ));
 
-// Particles generator component
+// Reduced number of particles for better performance
 const ParticlesBackground = memo(() => {
   const [particles, setParticles] = useState([]);
   
   useEffect(() => {
-    const newParticles = Array(20).fill().map(() => ({
+    // Reduced from 20 to 12 particles
+    const newParticles = Array(12).fill().map(() => ({
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
       width: `${Math.random() * 4 + 2}px`,
@@ -93,7 +63,6 @@ const ParticlesBackground = memo(() => {
   );
 });
 
-// Logo component 
 const Logo = memo(() => (
   <div className="relative p-3 sm:p-4 overflow-visible w-full text-center animate-fade-in">
     <div className="absolute -inset-8 sm:-inset-16 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl animate-pulse"></div>
@@ -107,7 +76,6 @@ const Logo = memo(() => (
   </div>
 ));
 
-// Progress indicator component
 const ProgressIndicator = memo(({ progress }) => (
   <div className="space-y-3 sm:space-y-4 group">
     <div className="h-1.5 sm:h-2 w-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm group-hover:h-2 sm:group-hover:h-2.5 transition-all duration-300">
@@ -123,7 +91,6 @@ const ProgressIndicator = memo(({ progress }) => (
   </div>
 ));
 
-// Dot animation component
 const AnimatedDots = memo(() => (
   <div className="flex justify-center space-x-2 sm:space-x-4 mt-4 sm:mt-8">
     {[0, 1, 2].map((i) => (
@@ -141,35 +108,32 @@ const AnimatedDots = memo(() => (
   </div>
 ));
 
-// Enhanced LoadingScreen with client-side only rendering
+// Loading messages are now defined outside the component
+const LOADING_MESSAGES = [
+  { icon: <Binary className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Initializing systems..." },
+  { icon: <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Optimizing performance..." },
+  { icon: <Loader2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Almost there..." },
+  { icon: <Code2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Loading components..." },
+  { icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Preparing interface..." },
+];
+
 const LoadingScreenComponent = memo(({ progress = 0, children }) => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-
-  const loadingMessages = useMemo(() => [
-    { icon: <Binary className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Initializing systems..." },
-    { icon: <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Optimizing performance..." },
-    { icon: <Loader2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Almost there..." },
-    { icon: <Code2 className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Loading components..." },
-    { icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />, text: "Preparing interface..." },
-  ], []);
 
   // Set message rotation interval
   useEffect(() => {
     const messageInterval = setInterval(() => {
-      setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
+      setCurrentMessageIndex(prev => (prev + 1) % LOADING_MESSAGES.length);
     }, 1500);
     return () => clearInterval(messageInterval);
-  }, [loadingMessages.length]);
+  }, []);
 
   return (
     <div className="fixed inset-0 flex flex-col justify-center items-center bg-black text-white z-50">
       <ParticlesBackground />
       
       <div className="w-full max-w-xs sm:max-w-sm md:max-w-md px-3 sm:px-4 md:px-8 space-y-4 sm:space-y-6 md:space-y-8 relative z-10">
-        {/* Logo Container */}
         <Logo />
-
-        {/* Subtitle */}
         <div className="space-y-1 sm:space-y-2 text-center">
           <p className="text-sm sm:text-base md:text-2xl font-light tracking-wide">
             The Computer Science Society of Shivaji College
@@ -178,14 +142,8 @@ const LoadingScreenComponent = memo(({ progress = 0, children }) => {
             University of Delhi
           </p>
         </div>
-
-        {/* Progress Indicator */}
         <ProgressIndicator progress={progress} />
-
-        {/* Loading Message */}
-        <LoadingMessage {...loadingMessages[currentMessageIndex]} />
-
-        {/* Animated dots */}
+        <LoadingMessage {...LOADING_MESSAGES[currentMessageIndex]} />
         <AnimatedDots />
       </div>
       
@@ -195,12 +153,12 @@ const LoadingScreenComponent = memo(({ progress = 0, children }) => {
   );
 });
 
-// Client-side only loading screen to prevent hydration mismatch
+// Client-side only loading screen
 const LoadingScreen = dynamic(() => Promise.resolve(LoadingScreenComponent), {
   ssr: false
 });
 
-// Preload main content components
+// Preload all main content components in a single hidden div
 const PreloadedMainContent = memo(() => (
   <div style={{ display: 'none' }}>
     <Header />
@@ -213,10 +171,9 @@ const PreloadedMainContent = memo(() => (
   </div>
 ));
 
-// Scroll indicator component
 const ScrollIndicator = memo(({ visible }) => (
   <div 
-    className={`fixed bottom-8 w-full flex justify-center sm:left-1/2 sm:transform sm:-translate-x-1/2 z-50 transition-opacity duration-500 ${
+    className={`fixed bottom-8 w-full flex justify-center z-50 transition-opacity duration-500 ${
       visible ? 'opacity-80 hover:opacity-100' : 'opacity-0 pointer-events-none'
     }`}
   >
@@ -241,7 +198,6 @@ const ScrollIndicator = memo(({ visible }) => (
   </div>
 ));
 
-// Scroll to top button
 const ScrollToTopButton = memo(({ onClick }) => (
   <button
     onClick={onClick}
@@ -264,85 +220,134 @@ const ScrollToTopButton = memo(({ onClick }) => (
   </button>
 ));
 
-// Loading and progress state hook
+// Custom hooks
 const useLoading = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [componentsPreloaded, setComponentsPreloaded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-
+  
   // Handle client-side mounting
   useEffect(() => {
     setIsMounted(true);
+    
+    // Skip loading if we've already shown it or if using hash navigation
+    const hasLoadingBeenShown = sessionStorage.getItem('loadingShown');
+    if (hasLoadingBeenShown || window.location.hash) {
+      setIsLoading(false);
+      setProgress(100);
+    }
   }, []);
 
-  // Preload components while showing loading animation
+  // Loading animation and component preloading
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !isLoading) return;
     
-    // Start the loading animation
+    // More efficient progress incrementing
     const loadingTimer = setInterval(() => {
       setProgress(prev => {
-        // Slow down progress at certain points to ensure components load
-        if (prev < 30) return Math.min(prev + 2, 30);
-        if (prev < 60 && !componentsPreloaded) return Math.min(prev + 0.5, 60);
+        // Faster initial loading
+        if (prev < 30) return prev + 3;
+        if (prev < 60 && !componentsPreloaded) return prev + 1;
         if (prev >= 100) {
           clearInterval(loadingTimer);
-          setTimeout(() => setIsLoading(false), 500);
+          setTimeout(() => {
+            setIsLoading(false);
+            sessionStorage.setItem('loadingShown', 'true');
+          }, 300); // Reduced from 500ms
           return 100;
         }
-        return Math.min(prev + 3, 100);
+        return prev + 4;
       });
-    }, 50);
+    }, 60); // Slightly slower interval but larger increments
 
-    // Preload components after a small delay
+    // Mark components as preloaded sooner
     const preloadTimer = setTimeout(() => {
-      // Mark components as preloaded after giving them time to initialize
       setComponentsPreloaded(true);
-    }, 800);
+    }, 600); // Reduced from 800ms
 
     return () => {
       clearInterval(loadingTimer);
       clearTimeout(preloadTimer);
     };
-  }, [isMounted, componentsPreloaded]);
+  }, [isMounted, componentsPreloaded, isLoading]);
 
   return { isLoading, progress, isMounted };
 };
 
-// Hook for scroll indicator visibility
+// More efficient scroll indicator implementation
 const useScrollIndicator = (isMounted) => {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
   useEffect(() => {
     if (!isMounted) return;
     
+    // Use requestAnimationFrame for smoother scrolling
+    let ticking = false;
+    
     const handleScroll = () => {
-      const shouldShow = window.scrollY < 100;
-      setShowScrollIndicator(shouldShow);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setShowScrollIndicator(window.scrollY < 100);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMounted]);
 
   return showScrollIndicator;
 };
 
+// Optimized hash scroll handling
+const useHashScroll = (isLoading, isMounted) => {
+  useEffect(() => {
+    if (!isMounted || isLoading) return;
+    
+    const scrollToHashSection = () => {
+      const hash = window.location.hash.substring(1);
+      
+      if (hash) {
+        requestAnimationFrame(() => {
+          const element = document.getElementById(hash);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+    };
+    
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(scrollToHashSection, 50); // Reduced from 100ms
+    
+    window.addEventListener('hashchange', scrollToHashSection, { passive: true });
+    return () => {
+      window.removeEventListener('hashchange', scrollToHashSection);
+      clearTimeout(timer);
+    };
+  }, [isLoading, isMounted]);
+};
+
 export default function Home() {
   const { isLoading, progress, isMounted } = useLoading();
   const showScrollIndicator = useScrollIndicator(isMounted);
+  
+  // Handle hash-based scrolling
+  useHashScroll(isLoading, isMounted);
   
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Return minimal SSR placeholder before hydration
+  // SSR placeholder
   if (!isMounted) {
     return <div className="min-h-screen bg-black"></div>;
   }
 
-  if (isLoading && isMounted) {
+  if (isLoading) {
     return (
       <LoadingScreen progress={progress}>
         <PreloadedMainContent />

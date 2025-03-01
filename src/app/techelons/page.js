@@ -1,4 +1,27 @@
 "use client";
+// import Header from "../_components/Header";
+// import Footer from "../_components/Footer";
+// import TechelonsHero from "../_components/techelonsComponents/TechelonsMain";
+// import TechelonsEvents from "../_components/techelonsComponents/TechelonsEvent";
+// import EventSchedule from "../_components/techelonsComponents/TechelonsSchedule";
+
+// export default function Techelons() {
+//   return (
+//     <>
+//       <Header />
+//       <div className="min-h-screen">
+//         <TechelonsHero />
+//         <hr className="h-px my-8 bg-gray-200 border-0 w-4/5 mx-auto shadow-sm" />
+//         <EventSchedule />
+//         <hr className="h-px my-8 bg-gray-200 border-0 w-4/5 mx-auto shadow-sm" />
+//         <TechelonsEvents />
+//       </div>
+//       <Footer />
+//     </>
+
+//   );
+// }
+
 
 {/* <>
 
