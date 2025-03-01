@@ -6,6 +6,7 @@ import { Dialog } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from "next/navigation"
 
 const navLinks = [
     { name: 'Home', href: '/' },
@@ -18,9 +19,10 @@ const navLinks = [
 
 const Header = ({ children }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const router = useRouter()
 
     const handleExit = () => {
-        window.open("/registrationclosed", "_self");
+        router.push("/registrationclosed")
         // window.open("/workshopregistration", "_blank");
         // window.open("/techelonsregistration", "_blank");
     };

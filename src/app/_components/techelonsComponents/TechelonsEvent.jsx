@@ -21,7 +21,7 @@ const TechelonsEvents = () => {
             venue: "Hall A",
             time: "10:00 AM - 12:00 PM",
             category: "coding",
-            price: "₹300",
+            price: "300",
             rules: [
                 "Individual participation only",
                 "Participants must bring their own laptops",
@@ -39,7 +39,7 @@ const TechelonsEvents = () => {
             venue: "Lab 1",
             time: "1:00 PM - 3:00 PM",
             category: "search",
-            price: "₹250",
+            price: "250",
             rules: [
                 "Teams of 2 members",
                 "Own devices allowed",
@@ -57,7 +57,7 @@ const TechelonsEvents = () => {
             venue: "Hall B",
             time: "11:00 AM - 1:00 PM",
             category: "design",
-            price: "₹400",
+            price: "400",
             rules: [
                 "Teams of 2-3 members",
                 "Own devices and software required",
@@ -75,7 +75,7 @@ const TechelonsEvents = () => {
             venue: "Lab 2",
             time: "2:00 PM - 4:00 PM",
             category: "communication",
-            price: "₹200",
+            price: "200",
             rules: [
                 "Individual participation",
                 "Smartphones will be provided",
@@ -93,7 +93,7 @@ const TechelonsEvents = () => {
             venue: "Hall C",
             time: "12:00 PM - 2:00 PM",
             category: "ai",
-            price: "₹350",
+            price: "350",
             rules: [
                 "Individual or pairs",
                 "Bring your own devices",
@@ -111,7 +111,7 @@ const TechelonsEvents = () => {
             venue: "Gaming Zone",
             time: "3:00 PM - 5:00 PM",
             category: "gaming",
-            price: "₹500",
+            price: "500",
             rules: [
                 "Teams of 4-5 members",
                 "Games: CS:GO, Valorant, and FIFA",
@@ -210,8 +210,8 @@ const TechelonsEvents = () => {
                                         key={category.id}
                                         onClick={() => setActiveTab(category.id)}
                                         className={`px-4 py-2 rounded-full text-sm md:text-base font-medium transition-all duration-300 ${activeTab === category.id
-                                                ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                                            ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                                             }`}
                                         aria-selected={activeTab === category.id}
                                         role="tab"
@@ -275,9 +275,7 @@ const TechelonsEvents = () => {
                                                     {event.time}
                                                 </div>
                                                 <div className="flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
+                                                    <span className="h-4 w-4 mr-2 text-gray-400 flex items-center justify-center">₹</span>
                                                     {event.price}
                                                 </div>
                                             </div>
@@ -349,7 +347,7 @@ const TechelonsEvents = () => {
                                                                             <div>
                                                                                 <h5 className="font-medium text-sm sm:text-base text-gray-900">Venue & Price</h5>
                                                                                 <p className="text-xs sm:text-sm text-gray-700 mt-1">{event.venue}</p>
-                                                                                <p className="text-xs sm:text-sm text-green-700 font-semibold">{event.price}</p>
+                                                                                <p className="text-xs sm:text-sm text-green-700 font-semibold">₹ {event.price}</p>
                                                                             </div>
                                                                         </div>
                                                                     </CardContent>
