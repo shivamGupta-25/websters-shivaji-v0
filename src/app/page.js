@@ -1,29 +1,98 @@
 "use client";
 
-// without loading screen
+import { useCallback, useState, useEffect, memo } from "react";
+import Header from "./_components/Header";
+import Footer from "./_components/Footer";
+import Banner from "./_components/Banner";
+import About from "./_components/About";
+import Workshop from "./_components/Workshop";
+import PastEvent from "./_components/PastEvent";
+import Council from "./_components/Council";
 
-  import Header from "./_components/Header";
-  import Footer from "./_components/Footer";
-  import Banner from "./_components/Banner";
-  import About from "./_components/About";
-  import Workshop from "./_components/Workshop";
-  import PastEvent from "./_components/PastEvent";
-  import Council from "./_components/Council";
+// Memoize UI components to prevent unnecessary re-renders
+const ScrollIndicator = memo(({ visible }) => (
+  <div 
+    className={`fixed bottom-8 w-full flex justify-center z-50 transition-opacity duration-500 ${
+      visible ? 'opacity-80 hover:opacity-100' : 'opacity-0 pointer-events-none'
+    }`}
+  >
+    <div className="flex flex-col items-center animate-bounce">
+      <span className="text-sm text-gray-600 mb-1 text-center px-4">Scroll to explore</span>
+      <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </div>
+  </div>
+));
 
-  export default function Home() {
+const ScrollToTopButton = memo(({ visible, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`fixed bottom-4 right-4 p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 z-40 ${
+      visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+    }`}
+    aria-label="Scroll to top"
+  >
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+  </button>
+));
+
+export default function Home() {
+  // Use a single state object to reduce rerenders
+  const [uiState, setUiState] = useState({
+    scrollY: 0,
+    showScrollIndicator: true,
+    showTopButton: false
+  });
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Optimized scroll handler with throttling
+  useEffect(() => {
+    let lastScrollY = 0;
+    let ticking = false;
+    
+    const handleScroll = () => {
+      lastScrollY = window.scrollY;
+      
+      if (!ticking) {
+        // Use requestAnimationFrame to throttle updates
+        window.requestAnimationFrame(() => {
+          setUiState({
+            scrollY: lastScrollY,
+            showScrollIndicator: lastScrollY < 100,
+            showTopButton: lastScrollY > 300
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Preload all components but render efficiently
   return (
-  <>
-    <Header>
+    <>
+      <Header />
       <main>
         <Banner />
         <About />
         <Workshop />
         <PastEvent />
         <Council />
+        
+        <ScrollIndicator visible={uiState.showScrollIndicator} />
+        <ScrollToTopButton visible={uiState.showTopButton} onClick={scrollToTop} />
       </main>
-    </Header>
-    <Footer />
-  </>
+      <Footer />
+    </>
   );
 }
 

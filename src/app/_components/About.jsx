@@ -11,18 +11,14 @@ const About = () => {
             <motion.div 
                 className="text-center mt-10 md:mt-16"
                 initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
+                animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                viewport={{ once: false, amount: 0.2 }}
             >
                 <motion.h1 
                     className="text-6xl md:text-7xl lg:text-9xl text-gray-900 font-bold leading-tight"
                     initial={{ opacity: 0, y: -20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
                     transition={{ duration: 1, delay: 0.2 }}
-                    viewport={{ once: false, amount: 0.2 }}
                 >
                     About Websters
                 </motion.h1>

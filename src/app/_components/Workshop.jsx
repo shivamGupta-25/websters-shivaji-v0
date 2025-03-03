@@ -4,13 +4,12 @@ import { memo } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation"
 
-// Animation variants for consistent reuse
+// Animation variants
 const animationVariants = {
   hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -50 }
+  visible: { opacity: 1, y: 0 }
 };
 
 // Workshop details data
@@ -25,8 +24,7 @@ const workshopDetails = [
   }
 ];
 
-
-// Separate DetailItem component for better organization
+// Separate DetailItem component
 const DetailItem = memo(({ label, value }) => (
   <p className="text-sm sm:text-base lg:text-lg">
     <strong className="text-gray-900 dark:text-white">{label}</strong>{' '}
@@ -37,11 +35,10 @@ const DetailItem = memo(({ label, value }) => (
 DetailItem.displayName = 'DetailItem';
 
 const Workshop = () => {
-  const router = useRouter();
-
-  const handleExit = () => {
-        window.open("/registrationclosed", "_self");
-        // window.open("/workshopregistration", "_blank");
+  const router = useRouter()
+  const handleRegistration = () => {
+    router.push("/registrationclosed")
+    // window.open("/workshopregistration", "_blank");
   };
 
   return (
@@ -53,7 +50,6 @@ const Workshop = () => {
         className="text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8"
         initial="hidden"
         whileInView="visible"
-        exit="exit"
         variants={animationVariants}
         viewport={{ amount: 0.5 }}
         transition={{ type: 'spring', stiffness: 50, damping: 20, duration: 0.8 }}
@@ -99,7 +95,7 @@ const Workshop = () => {
             whileTap={{ scale: 0.97 }}
           >
             <Button
-              onClick={handleExit}
+              onClick={handleRegistration}
               className="px-6 py-3 sm:px-9 sm:py-6 text-sm sm:text-base rounded-full font-bold shadow-lg tracking-wide"
             >
               Register Now

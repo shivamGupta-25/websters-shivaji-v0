@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import { useRouter } from "next/navigation"
 
 // Lazy load the SplineScene component
 const SplineScene = lazy(() =>
@@ -37,6 +38,13 @@ const TechelonsMain = () => {
         { title: "Workshops", icon: "💡", description: "Learn cutting-edge technologies through hands-on workshops led by industry experts." },
         { title: "Networking", icon: "🌐", description: "Connect with tech enthusiasts, professionals, and potential employers." }
     ];
+
+    const router = useRouter()
+    const handleExit = () => {
+        router.push("/registrationclosed")
+        // window.open("/registrationclosed", "_self");
+        // window.open("/workshopregistration", "_blank");
+  };
 
     return (
         <section className="relative py-8 md:py-8 overflow-hidden">
@@ -86,7 +94,7 @@ const TechelonsMain = () => {
                             </p>
 
                             <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-4">
-                                <button className="w-full sm:w-auto bg-white text-indigo-800 py-2 px-4 md:py-2.5 md:px-5 font-semibold rounded-full shadow-lg hover:shadow-indigo-500/30 transition-all duration-300">
+                                <button onClick={handleExit} className="w-full sm:w-auto bg-white text-indigo-800 py-2 px-4 md:py-2.5 md:px-5 font-semibold rounded-full shadow-lg hover:shadow-indigo-500/30 transition-all duration-300">
                                     Register Now
                                 </button>
                                 <a href="#events" className="w-full sm:w-auto text-center bg-indigo-700/50 text-white py-2 px-4 md:py-2.5 md:px-5 font-semibold rounded-full border border-indigo-500/30 hover:bg-indigo-700/70 transition-all duration-300">

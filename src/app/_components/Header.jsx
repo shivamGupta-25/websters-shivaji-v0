@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation";
 
 const navLinks = [
     { name: 'Home', href: '/' },
@@ -19,13 +18,58 @@ const navLinks = [
 
 const Header = ({ children }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const router = useRouter()
+    const router = useRouter();
+    const pathname = usePathname();
+    const isHomePage = pathname === '/';
 
-    const handleExit = () => {
-        router.push("/registrationclosed")
+    const handleExit = useCallback(() => {
+        router.push("/registrationclosed");
         // window.open("/workshopregistration", "_blank");
         // window.open("/techelonsregistration", "_blank");
-    };
+    }, [router]);
+
+    const handleNavigation = useCallback((href) => {
+        if (href.startsWith('/#') && !isHomePage) {
+            router.push('/');
+            sessionStorage.setItem('scrollTarget', href.substring(1));
+        } else {
+            router.push(href);
+        }
+        setMobileMenuOpen(false);
+    }, [router, isHomePage]);
+
+    useEffect(() => {
+        if (isHomePage) {
+            const scrollTarget = sessionStorage.getItem('scrollTarget');
+            if (scrollTarget) {
+                const timeoutId = setTimeout(() => {
+                    const element = document.querySelector(scrollTarget);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    sessionStorage.removeItem('scrollTarget');
+                }, 100);
+                
+                return () => clearTimeout(timeoutId);
+            }
+        }
+    }, [isHomePage]);
+
+    const renderNavLinks = (onClick, className) => (
+        navLinks.map((link) => (
+            <a
+                key={link.name}
+                href={link.href}
+                className={className}
+                onClick={(e) => {
+                    e.preventDefault();
+                    onClick(link.href);
+                }}
+            >
+                {link.name}
+            </a>
+        ))
+    );
 
     return (
         <>
@@ -37,7 +81,14 @@ const Header = ({ children }) => {
             >
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5">
                     <nav className="flex items-center justify-between">
-                        <Link href="/" className="flex-shrink-0 z-10">
+                        <a 
+                            href="/"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleNavigation('/');
+                            }}
+                            className="flex-shrink-0 z-10"
+                        >
                             <Image
                                 alt="logo"
                                 src="/assets/Header_logo.png"
@@ -46,7 +97,7 @@ const Header = ({ children }) => {
                                 className="h-8 sm:h-6 lg:h-8 w-auto"
                                 priority
                             />
-                        </Link>
+                        </a>
 
                         <motion.div
                             initial={{ opacity: 0, y: -5 }}
@@ -54,15 +105,10 @@ const Header = ({ children }) => {
                             transition={{ duration: 0.4, ease: 'easeOut', delay: 0.2 }}
                             className="hidden md:flex md:items-center md:gap-4 lg:gap-6 xl:gap-8"
                         >
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.name}
-                                    href={link.href}
-                                    className="text-sm lg:text-base font-semibold text-gray-900 hover:text-gray-600 transition duration-200 hover:underline"
-                                >
-                                    {link.name}
-                                </Link>
-                            ))}
+                            {renderNavLinks(
+                                handleNavigation, 
+                                "text-sm lg:text-base font-semibold text-gray-900 hover:text-gray-600 transition duration-200 hover:underline"
+                            )}
                         </motion.div>
 
                         <motion.div
@@ -95,7 +141,7 @@ const Header = ({ children }) => {
 
             <AnimatePresence>
                 {mobileMenuOpen && (
-                    <Dialog open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} className="fixed inset-0 z-50">
+                    <Dialog as="div" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} className="fixed inset-0 z-50">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -113,7 +159,15 @@ const Header = ({ children }) => {
                             className="fixed inset-y-0 right-0 w-64 sm:w-72 bg-white px-6 py-6 shadow-lg z-50"
                         >
                             <div className="flex items-center justify-between">
-                                <Link href="/" className="flex-shrink-0">
+                                <a 
+                                    href="/"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleNavigation('/');
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    className="flex-shrink-0"
+                                >
                                     <Image
                                         alt="logo"
                                         src="/assets/Header_logo.png"
@@ -121,7 +175,7 @@ const Header = ({ children }) => {
                                         height={65}
                                         className="h-9 w-auto"
                                     />
-                                </Link>
+                                </a>
                                 <button
                                     type="button"
                                     onClick={() => setMobileMenuOpen(false)}
@@ -133,16 +187,10 @@ const Header = ({ children }) => {
                             </div>
 
                             <div className="mt-6 space-y-4">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        href={link.href}
-                                        className="block text-lg font-semibold text-gray-900 hover:underline text-gray-600 transition duration-200"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        {link.name}
-                                    </Link>
-                                ))}
+                                {renderNavLinks(
+                                    handleNavigation,
+                                    "block text-lg font-semibold text-gray-900 hover:underline text-gray-600 transition duration-200"
+                                )}
                                 <hr className="border-gray-300 my-4" />
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}

@@ -62,59 +62,51 @@ const councilMembers = [
 ];
 
 const Council = () => {
+    // Memoized animation settings
+    const titleAnimation = {
+        initial: { opacity: 0, y: 50 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { amount: 0.5 },
+        transition: { type: 'spring', stiffness: 50, damping: 20, duration: 0.8 }
+    };
+
+    // Swiper configuration
+    const swiperConfig = {
+        modules: [Autoplay, EffectCoverflow],
+        effect: "coverflow",
+        grabCursor: true,
+        centeredSlides: true,
+        slidesPerView: "auto",
+        loop: true,
+        coverflowEffect: {
+            rotate: 15,
+            depth: 100,
+            modifier: 1,
+            slideShadows: false,
+        },
+        autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+        },
+        breakpoints: {
+            320: { slidesPerView: 1, spaceBetween: 12 },
+            640: { slidesPerView: 2, spaceBetween: 16 },
+            768: { slidesPerView: 3, spaceBetween: 28 },
+            1024: { slidesPerView: 4, spaceBetween: 28 }
+        }
+    };
+
     return (
         <section id="council" className="mt-8 px-4 max-w-[1400px] mx-auto">
             <motion.h1
                 className="text-center text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8 sm:mb-10"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -50 }}
-                viewport={{ amount: 0.5 }}
-                transition={{ type: 'spring', stiffness: 50, damping: 20, duration: 0.8 }}
+                {...titleAnimation}
             >
                 Council
             </motion.h1>
 
-            <Swiper
-                modules={[Autoplay, EffectCoverflow]}
-                effect="coverflow"
-                grabCursor={true}
-                centeredSlides={true}
-                slidesPerView="auto"
-                spaceBetween={24}
-                loop={true}
-                coverflowEffect={{
-                    rotate: 15,
-                    stretch: 0,
-                    depth: 100,
-                    modifier: 1,
-                    slideShadows: false,
-                }}
-                autoplay={{
-                    delay: 3000,
-                    disableOnInteraction: false,
-                    pauseOnMouseEnter: true
-                }}
-                breakpoints={{
-                    320: {
-                        slidesPerView: 1,
-                        spaceBetween: 12
-                    },
-                    640: {
-                        slidesPerView: 2,
-                        spaceBetween: 16
-                    },
-                    768: {
-                        slidesPerView: 3,
-                        spaceBetween: 28
-                    },
-                    1024: {
-                        slidesPerView: 4,
-                        spaceBetween: 28
-                    }
-                }}
-                className="w-full"
-            >
+            <Swiper {...swiperConfig} className="w-full">
                 {councilMembers.map((member, index) => (
                     <SwiperSlide key={index} className="h-auto">
                         <Card className="overflow-hidden bg-white">
@@ -125,10 +117,9 @@ const Council = () => {
                                     className="object-cover"
                                     width={300}
                                     height={300}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                    }}
+                                    style={{ width: '100%', height: '100%' }}
+                                    priority={index < 4} // Load first 4 images with priority
+                                    loading={index < 4 ? "eager" : "lazy"} // Lazy load others
                                 />
                             </div>
                             <CardContent className="p-4 text-center">
@@ -138,15 +129,17 @@ const Council = () => {
                                 <p className="text-md text-gray-600 mb-3">
                                     {member.role}
                                 </p>
-                                <a
-                                    href={member.linkedin}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center text-blue-500"
-                                    aria-label={`LinkedIn profile of ${member.name}`}
-                                >
-                                    <Linkedin className="w-6 h-6" />
-                                </a>
+                                {member.linkedin !== "#" && (
+                                    <a
+                                        href={member.linkedin}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center justify-center text-blue-500"
+                                        aria-label={`LinkedIn profile of ${member.name}`}
+                                    >
+                                        <Linkedin className="w-6 h-6" />
+                                    </a>
+                                )}
                             </CardContent>
                         </Card>
                     </SwiperSlide>
