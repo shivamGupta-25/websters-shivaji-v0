@@ -4,13 +4,7 @@ import { memo } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useRouter } from "next/navigation"
-
-// Animation variants
-const animationVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0 }
-};
+import { useRouter } from "next/navigation";
 
 // Workshop details data
 const workshopDetails = [
@@ -24,7 +18,7 @@ const workshopDetails = [
   }
 ];
 
-// Separate DetailItem component
+// Optimized DetailItem component
 const DetailItem = memo(({ label, value }) => (
   <p className="text-sm sm:text-base lg:text-lg">
     <strong className="text-gray-900 dark:text-white">{label}</strong>{' '}
@@ -35,24 +29,19 @@ const DetailItem = memo(({ label, value }) => (
 DetailItem.displayName = 'DetailItem';
 
 const Workshop = () => {
-  const router = useRouter()
-  const handleRegistration = () => {
-    router.push("/registrationclosed")
-    // window.open("/workshopregistration", "_blank");
-  };
-
+  const router = useRouter();
+  
   return (
     <section
       id="workshop"
-      className="container mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex flex-col items-center justify-center"
+      className="container mx-auto mb-12 px-4 sm:px-6 lg:px-8 mt-8 flex flex-col items-center justify-center"
     >
       <motion.h1
         className="text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8"
-        initial="hidden"
-        whileInView="visible"
-        variants={animationVariants}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.5 }}
-        transition={{ type: 'spring', stiffness: 50, damping: 20, duration: 0.8 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
       >
         Workshop
       </motion.h1>
@@ -93,9 +82,10 @@ const Workshop = () => {
             className="text-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
             <Button
-              onClick={handleRegistration}
+              onClick={() => router.push("/registrationclosed")}
               className="px-6 py-3 sm:px-9 sm:py-6 text-sm sm:text-base rounded-full font-bold shadow-lg tracking-wide"
             >
               Register Now

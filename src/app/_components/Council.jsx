@@ -8,14 +8,16 @@ import { Autoplay, EffectCoverflow } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/autoplay";
+import { memo } from "react";
 import { motion } from "framer-motion";
 
+// Move data outside component to prevent re-creation on each render
 const councilMembers = [
     {
         name: "Shivani Singh",
         role: "President",
         image: "/assets/Council/Shivani Singh.jpg",
-        linkedin: "#"
+        linkedin: null
     },
     {
         name: "Jai Solanki",
@@ -27,7 +29,7 @@ const councilMembers = [
         name: "Manish Pathak",
         role: "Vice-President",
         image: "/assets/Council/Manish Pathak.jpg",
-        linkedin: "#"
+        linkedin: null
     },
     {
         name: "Shivam Raj Gupta",
@@ -61,47 +63,81 @@ const councilMembers = [
     }
 ];
 
+// Pre-define swiper configuration outside component
+const swiperConfig = {
+    modules: [Autoplay, EffectCoverflow],
+    effect: "coverflow",
+    grabCursor: true,
+    centeredSlides: true,
+    slidesPerView: "auto",
+    loop: true,
+    coverflowEffect: {
+        rotate: 15,
+        depth: 100,
+        modifier: 1,
+        slideShadows: false,
+    },
+    autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true
+    },
+    breakpoints: {
+        320: { slidesPerView: 1, spaceBetween: 12 },
+        640: { slidesPerView: 2, spaceBetween: 16 },
+        768: { slidesPerView: 3, spaceBetween: 28 },
+        1024: { slidesPerView: 4, spaceBetween: 28 }
+    }
+};
+
+// Memoized MemberCard component to prevent unnecessary re-renders
+const MemberCard = memo(({ member }) => (
+    <Card className="overflow-hidden bg-white">
+        <div className="relative w-full h-[380px]">
+            <Image
+                src={member.image}
+                alt={member.name}
+                className="object-cover"
+                width={300}
+                height={380}
+                style={{ width: '100%', height: '100%' }}
+                loading="lazy"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+            />
+        </div>
+        <CardContent className="p-4 text-center">
+            <h2 className="text-lg font-bold truncate mb-1">
+                {member.name}
+            </h2>
+            <p className="text-md text-gray-600 mb-3">
+                {member.role}
+            </p>
+            {member.linkedin && (
+                <a
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center text-blue-500"
+                    aria-label={`LinkedIn profile of ${member.name}`}
+                >
+                    <Linkedin className="w-6 h-6" />
+                </a>
+            )}
+        </CardContent>
+    </Card>
+));
+
+MemberCard.displayName = 'MemberCard';
+
 const Council = () => {
-    // Memoized animation settings
-    const titleAnimation = {
-        initial: { opacity: 0, y: 50 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { amount: 0.5 },
-        transition: { type: 'spring', stiffness: 50, damping: 20, duration: 0.8 }
-    };
-
-    // Swiper configuration
-    const swiperConfig = {
-        modules: [Autoplay, EffectCoverflow],
-        effect: "coverflow",
-        grabCursor: true,
-        centeredSlides: true,
-        slidesPerView: "auto",
-        loop: true,
-        coverflowEffect: {
-            rotate: 15,
-            depth: 100,
-            modifier: 1,
-            slideShadows: false,
-        },
-        autoplay: {
-            delay: 3000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true
-        },
-        breakpoints: {
-            320: { slidesPerView: 1, spaceBetween: 12 },
-            640: { slidesPerView: 2, spaceBetween: 16 },
-            768: { slidesPerView: 3, spaceBetween: 28 },
-            1024: { slidesPerView: 4, spaceBetween: 28 }
-        }
-    };
-
     return (
-        <section id="council" className="mt-8 px-4 max-w-[1400px] mx-auto">
+        <section id="council" className="mb-8 px-4 max-w-[1400px] mx-auto">
             <motion.h1
-                className="text-center text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8 sm:mb-10"
-                {...titleAnimation}
+                className="flex justify-center items-center text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.5 }}
+                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
             >
                 Council
             </motion.h1>
@@ -109,39 +145,7 @@ const Council = () => {
             <Swiper {...swiperConfig} className="w-full">
                 {councilMembers.map((member, index) => (
                     <SwiperSlide key={index} className="h-auto">
-                        <Card className="overflow-hidden bg-white">
-                            <div className="relative w-full h-[380px]">
-                                <Image
-                                    src={member.image}
-                                    alt={member.name}
-                                    className="object-cover"
-                                    width={300}
-                                    height={300}
-                                    style={{ width: '100%', height: '100%' }}
-                                    priority={index < 4} // Load first 4 images with priority
-                                    loading={index < 4 ? "eager" : "lazy"} // Lazy load others
-                                />
-                            </div>
-                            <CardContent className="p-4 text-center">
-                                <h2 className="text-lg font-bold truncate mb-1">
-                                    {member.name}
-                                </h2>
-                                <p className="text-md text-gray-600 mb-3">
-                                    {member.role}
-                                </p>
-                                {member.linkedin !== "#" && (
-                                    <a
-                                        href={member.linkedin}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center justify-center text-blue-500"
-                                        aria-label={`LinkedIn profile of ${member.name}`}
-                                    >
-                                        <Linkedin className="w-6 h-6" />
-                                    </a>
-                                )}
-                            </CardContent>
-                        </Card>
+                        <MemberCard member={member} />
                     </SwiperSlide>
                 ))}
             </Swiper>
@@ -149,4 +153,4 @@ const Council = () => {
     );
 };
 
-export default Council;
+export default memo(Council);
