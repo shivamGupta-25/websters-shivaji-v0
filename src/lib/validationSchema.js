@@ -2,46 +2,42 @@ import { z } from "zod";
 
 export const EVENTS = [
     {
-        id: "ui-ux-workshop",
-        name: "UI/UX Workshop",
+        id: "Seminar",
+        name: "AI and Cyber Security (Seminar)",
         teamSize: { min: 1, max: 1 }
     },
     {
-        id: "web-dev-workshop",
-        name: "Web Development Workshop",
+        id: "debug-code",
+        name: "Debug the Code",
         teamSize: { min: 1, max: 1 }
     },
     {
-        id: "cloud-computing",
-        name: "Cloud Computing Workshop",
-        teamSize: { min: 1, max: 1 }
-    },
-    {
-        id: "gaming",
-        name: "Gaming Event",
-        teamSize: { min: 2, max: 4 }
-    },
-    {
-        id: "hackathon",
-        name: "Hackathon",
-        teamSize: { min: 3, max: 4 }
-    },
-    {
-        id: "coding",
-        name: "Coding Competition",
+        id: "ai-artistry",
+        name: "AI Artistry",
         teamSize: { min: 2, max: 2 }
     },
     {
-        id: "quiz",
-        name: "Tech Quiz",
+        id: "gaming",
+        name: "E-Lafda (Tekken)",
+        teamSize: { min: 1, max: 4 }
+    },
+    {
+        id: "data-diviation",
+        name: "Data Diviation",
         teamSize: { min: 1, max: 1 }
     },
     {
-        id: "presentation",
-        name: "Paper Presentation",
-        teamSize: { min: 1, max: 2 }
-    }
+        id: "poster-making",
+        name: "Digital Poster Making",
+        teamSize: { min: 1, max: 1 }
+    },
+    {
+        id: "reel-comp",
+        name: "Tech Reel War",
+        teamSize: { min: 1, max: 1 }
+    },
 ];
+
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];

@@ -43,6 +43,53 @@ export default function RegistrationPage() {
       setSelectedEvent(event);
       setRequiredTeamSize(event.teamSize);
       setTeamSize(Math.max(1, event.teamSize.min - 1));
+
+      // Event selection toast notification
+      toast.success(
+        `You've selected: ${event.name}`,
+        { 
+          icon: '🎯',
+          duration: 3000,
+          style: {
+            borderLeft: '4px solid #10B981',
+            padding: '16px'
+          }
+        }
+      );
+
+      // Team size requirements notification if applicable
+      if (event.teamSize.max > 1) {
+        setTimeout(() => {
+          toast(
+            `${event.name} requires ${event.teamSize.min}-${event.teamSize.max} team members.`,
+            { 
+              duration: 4000,
+              icon: '👥',
+              style: {
+                borderLeft: '4px solid #3B82F6',
+                padding: '16px'
+              }
+            }
+          );
+        }, 500); // Slight delay between toasts
+      }
+      
+      // Show any specific event instructions if available
+      if (event.instructions) {
+        setTimeout(() => {
+          toast.info(
+            event.instructions,
+            { 
+              duration: 5000,
+              icon: 'ℹ️',
+              style: {
+                borderLeft: '4px solid #60A5FA',
+                padding: '16px'
+              }
+            }
+          );
+        }, 1000);
+      }
     }
   }, [watchedEvent]);
 
@@ -58,11 +105,32 @@ export default function RegistrationPage() {
     const currentValues = watch();
     const updatedTeamMembers = currentValues.teamMembers?.slice(0, newSize) || [];
     setValue('teamMembers', updatedTeamMembers);
+
+    toast.success(`Team member removed. Total members: ${newSize}`, { 
+      duration: 2000,
+      icon: '👤'
+    });
+  };
+
+  const handleAddMember = () => {
+    const newSize = Math.min(requiredTeamSize.max - 1, teamSize + 1);
+    setTeamSize(newSize);
+    
+    toast.success(`Team member added. Total members: ${newSize}`, { 
+      duration: 2000,
+      icon: '➕'
+    });
   };
 
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
+      
+      // Show loading toast
+      const loadingToast = toast.loading(
+        `Submitting your registration for ${selectedEvent?.name || 'Techelons-25'}...`
+      );
+      
       const formData = new FormData();
 
       // Append main form data
@@ -95,26 +163,92 @@ export default function RegistrationPage() {
       });
 
       const result = await response.json();
+      
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
 
       if (!response.ok) {
         throw new Error(result.error || 'Registration failed');
       }
 
-      toast.success("Registration Successful!");
+      toast.success(
+        `Registration Successful! Welcome to ${selectedEvent?.name || 'Techelons-25'}`, 
+        { 
+          duration: 5000,
+          icon: '🎉'
+        }
+      );
+      
+      // Show confirmation details
       reset();
       setTimeout(() => {
-        router.push('/formsubmitted')
-    }, 200);
+        router.push('/formsubmitted');
+      }, 100);
     } catch (error) {
-      toast.error(error.message);
+      // Show specific error message
+      const errorMessage = error.message || 'Registration failed. Please try again.';
+      
+      toast.error(errorMessage, { 
+        duration: 4000,
+        icon: '❌'
+      });
+      
+      // If the error is related to a specific field, highlight it
+      if (errorMessage.toLowerCase().includes('email')) {
+        toast('Check your email address and try again', { icon: '📧' });
+      } else if (errorMessage.toLowerCase().includes('file') || errorMessage.toLowerCase().includes('id')) {
+        toast('There may be an issue with your uploaded ID', { icon: '📁' });
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Field validation feedback notifications
+  const showFieldErrorToasts = () => {
+    if (Object.keys(errors).length > 0) {
+      // Get the first error for notification
+      const firstErrorField = Object.keys(errors)[0];
+      const firstErrorMessage = errors[firstErrorField]?.message || 'Please check form fields';
+      
+      toast.error(firstErrorMessage, {
+        duration: 3000,
+        icon: '⚠️'
+      });
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-100 py-6 sm:py-8 md:py-10 lg:py-12 px-4 sm:px-6 lg:px-8">
-      <Toaster position="top-center" />
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          // Custom styling for all toasts
+          style: {
+            borderRadius: '10px',
+            background: '#333',
+            color: '#fff',
+          },
+          // Custom success styling
+          success: {
+            style: {
+              background: '#10B981',
+            },
+          },
+          // Custom error styling
+          error: {
+            style: {
+              background: '#EF4444',
+            },
+          },
+          // Custom info styling
+          info: {
+            style: {
+              background: '#3B82F6',
+            },
+          },
+        }}
+      />
       <div className="w-full max-w-2xl mx-auto">
         <Card className="w-full shadow-lg">
           <CardHeader className="space-y-2 px-4 sm:px-6">
@@ -122,11 +256,15 @@ export default function RegistrationPage() {
             <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-center">Registration</CardTitle>
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit(onSubmit, showFieldErrorToasts)} className="space-y-4 sm:space-y-6">
               {/* Event Selection */}
               <div className="space-y-1 sm:space-y-2">
                 <Label className="text-sm sm:text-base">Event</Label>
-                <Select onValueChange={(value) => setValue("event", value)}>
+                <Select 
+                  onValueChange={(value) => {
+                    setValue("event", value);
+                  }}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select Event" />
                   </SelectTrigger>
@@ -143,6 +281,26 @@ export default function RegistrationPage() {
                 )}
               </div>
 
+              {selectedEvent && (
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md mb-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-blue-700">
+                        You've selected: <span className="font-medium">{selectedEvent.name}</span>
+                      </p>
+                      {selectedEvent.description && (
+                        <p className="mt-1 text-xs text-blue-600">{selectedEvent.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Personal Information */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-1 sm:space-y-2">
@@ -155,7 +313,20 @@ export default function RegistrationPage() {
 
                 <div className="space-y-1 sm:space-y-2">
                   <Label className="text-sm sm:text-base">Email</Label>
-                  <Input type="email" placeholder="Email" {...register("email")} className="w-full" />
+                  <Input 
+                    type="email" 
+                    placeholder="Email" 
+                    {...register("email")} 
+                    className="w-full" 
+                    onBlur={(e) => {
+                      if (e.target.value && !e.target.value.includes('@')) {
+                        toast.error('Please enter a valid email address', { 
+                          duration: 2000,
+                          icon: '📧'
+                        });
+                      }
+                    }}
+                  />
                   {errors.email && (
                     <p className="text-xs sm:text-sm text-red-600">{errors.email.message}</p>
                   )}
@@ -163,7 +334,20 @@ export default function RegistrationPage() {
 
                 <div className="space-y-1 sm:space-y-2">
                   <Label className="text-sm sm:text-base">Phone Number</Label>
-                  <Input type="tel" placeholder="Phone Number" {...register("phone")} className="w-full" />
+                  <Input 
+                    type="tel" 
+                    placeholder="Phone Number" 
+                    {...register("phone")} 
+                    className="w-full"
+                    onBlur={(e) => {
+                      if (e.target.value && (e.target.value.length < 10 || isNaN(e.target.value))) {
+                        toast.error('Please enter a valid phone number', { 
+                          duration: 2000,
+                          icon: '📱'
+                        });
+                      }
+                    }}
+                  />
                   {errors.phone && (
                     <p className="text-xs sm:text-sm text-red-600">{errors.phone.message}</p>
                   )}
@@ -207,7 +391,15 @@ export default function RegistrationPage() {
               <div className="space-y-3 sm:space-y-4">
                 <div className="space-y-1 sm:space-y-2">
                   <Label className="text-sm sm:text-base">College</Label>
-                  <Select onValueChange={(value) => setValue("college", value)}>
+                  <Select onValueChange={(value) => {
+                    setValue("college", value);
+                    if (value === "Shivaji College") {
+                      toast('Welcome, Shivaji College student!', {
+                        icon: '🏫',
+                        duration: 2000
+                      });
+                    }
+                  }}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select College" />
                     </SelectTrigger>
@@ -242,6 +434,22 @@ export default function RegistrationPage() {
                     accept=".jpg,.jpeg,.png,.pdf"
                     {...register("collegeId")}
                     className="w-full"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        const file = e.target.files[0];
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error('File size should be less than 5MB', { 
+                            duration: 3000,
+                            icon: '📁'
+                          });
+                        } else {
+                          toast.success('ID uploaded successfully', { 
+                            duration: 2000,
+                            icon: '✅'
+                          });
+                        }
+                      }
+                    }}
                   />
                   {errors.collegeId && (
                     <p className="text-xs sm:text-sm text-red-600">{errors.collegeId.message}</p>
@@ -267,7 +475,7 @@ export default function RegistrationPage() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setTeamSize(Math.min(requiredTeamSize.max - 1, teamSize + 1))}
+                        onClick={handleAddMember}
                         disabled={teamSize >= requiredTeamSize.max - 1}
                         className="w-full sm:w-auto text-sm"
                       >
@@ -301,6 +509,14 @@ export default function RegistrationPage() {
                               placeholder="Email"
                               {...register(`teamMembers.${index}.email`)}
                               className="w-full"
+                              onBlur={(e) => {
+                                if (e.target.value && !e.target.value.includes('@')) {
+                                  toast.error(`Team member ${index + 1}: Invalid email`, { 
+                                    duration: 2000,
+                                    icon: '📧'
+                                  });
+                                }
+                              }}
                             />
                             {errors.teamMembers?.[index]?.email && (
                               <p className="text-xs sm:text-sm text-red-600">{errors.teamMembers[index].email.message}</p>
@@ -369,6 +585,17 @@ export default function RegistrationPage() {
                               accept=".jpg,.jpeg,.png,.pdf"
                               {...register(`teamMembers.${index}.collegeId`)}
                               className="w-full"
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                  const file = e.target.files[0];
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    toast.error(`Team member ${index + 1}: File too large`, { 
+                                      duration: 3000,
+                                      icon: '📁'
+                                    });
+                                  }
+                                }
+                              }}
                             />
                             {errors.teamMembers?.[index]?.collegeId && (
                               <p className="text-xs sm:text-sm text-red-600">{errors.teamMembers[index].collegeId.message}</p>
@@ -399,6 +626,14 @@ export default function RegistrationPage() {
                 type="submit"
                 className="w-full py-2 text-sm sm:text-base mt-4"
                 disabled={isSubmitting}
+                onClick={() => {
+                  if (!watchedEvent) {
+                    toast.error('Please select an event', { 
+                      duration: 3000,
+                      icon: '🎯'
+                    });
+                  }
+                }}
               >
                 {isSubmitting ? 'Submitting...' : 'Register'}
               </Button>
