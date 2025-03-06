@@ -11,31 +11,43 @@ const SCOPES = [
 
 const SHEET_RANGE = 'Sheet1!A:Z';
 
+// Create a singleton instance of GoogleClient
+let googleClientInstance = null;
+
 class GoogleClient {
     constructor() {
         this.auth = null;
         this.drive = null;
         this.sheets = null;
+        this.initialized = false;
+    }
+
+    static getInstance() {
+        if (!googleClientInstance) {
+            googleClientInstance = new GoogleClient();
+        }
+        return googleClientInstance;
     }
 
     async initialize() {
-        if (!this.auth) {
-            try {
-                this.auth = new JWT({
-                    email: process.env.GOOGLE_CLIENT_EMAIL,
-                    key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-                    scopes: SCOPES,
-                });
+        if (this.initialized) return;
+        
+        try {
+            this.auth = new JWT({
+                email: process.env.GOOGLE_CLIENT_EMAIL,
+                key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                scopes: SCOPES,
+            });
 
-                await this.auth.authorize();
-                this.drive = google.drive({ version: 'v3', auth: this.auth });
-                this.sheets = google.sheets({ version: 'v4', auth: this.auth });
+            await this.auth.authorize();
+            this.drive = google.drive({ version: 'v3', auth: this.auth });
+            this.sheets = google.sheets({ version: 'v4', auth: this.auth });
 
-                await this.ensureSheetExists();
-            } catch (error) {
-                console.error('Initialization error:', error);
-                throw new Error('Failed to initialize Google client');
-            }
+            await this.ensureSheetExists();
+            this.initialized = true;
+        } catch (error) {
+            console.error('Initialization error:', error);
+            throw new Error('Failed to initialize Google client');
         }
     }
 
@@ -173,7 +185,15 @@ class GoogleClient {
             });
 
             const rows = response.data.values || [];
-            return rows.some(row => {
+            
+            // Skip the header row if it exists
+            const dataRows = rows.length > 0 ? rows.slice(1) : [];
+            
+            // Check for duplicates using more efficient filtering
+            return dataRows.some(row => {
+                // Ensure row has enough elements
+                if (row.length < 8) return false;
+                
                 const emailMatch = row[1] === email;
                 const phoneMatch = row[6] === phone;
                 const eventMatch = row[7] === event;
@@ -187,7 +207,7 @@ class GoogleClient {
 }
 
 export async function POST(req) {
-    const googleClient = new GoogleClient();
+    const googleClient = GoogleClient.getInstance();
 
     try {
         await googleClient.initialize();
@@ -214,20 +234,24 @@ export async function POST(req) {
             );
         }
 
-        // Upload main participant's college ID
-        const mainCollegeIdUrl = await googleClient.uploadToDrive(
+        // Upload files and prepare team member data in parallel
+        const uploadPromises = [];
+        const teamMembers = [];
+        
+        // Main participant's college ID upload
+        const mainCollegeIdPromise = googleClient.uploadToDrive(
             formData.get('collegeId'),
             'Main_Participant',
             userData
         );
-
-        // Process team members
-        const teamMembers = [];
+        uploadPromises.push(mainCollegeIdPromise);
+        
+        // Process team members in parallel
         let memberIndex = 0;
-
         while (formData.get(`teamMember_${memberIndex}`)) {
             const memberData = JSON.parse(formData.get(`teamMember_${memberIndex}`));
             const memberFileKey = `teamMember_${memberIndex}_collegeId`;
+            const memberFile = formData.get(memberFileKey);
             
             const memberUserData = {
                 ...userData,
@@ -236,18 +260,31 @@ export async function POST(req) {
                 otherCollege: memberData.otherCollege
             };
 
-            const memberCollegeIdUrl = await googleClient.uploadToDrive(
-                formData.get(memberFileKey),
+            const uploadPromise = googleClient.uploadToDrive(
+                memberFile,
                 `Team_Member_${memberIndex + 1}`,
                 memberUserData
-            );
-
-            teamMembers.push({
-                ...memberData,
-                collegeIdUrl: memberCollegeIdUrl
+            ).then(url => {
+                teamMembers[memberIndex] = {
+                    ...memberData,
+                    collegeIdUrl: url
+                };
             });
+            
+            uploadPromises.push(uploadPromise);
             memberIndex++;
         }
+
+        // Wait for all uploads to complete
+        await Promise.all(uploadPromises);
+        const mainCollegeIdUrl = await mainCollegeIdPromise;
+
+        // Sort team members to ensure correct order
+        teamMembers.sort((a, b) => {
+            const indexA = parseInt(Object.keys(a).find(key => key.startsWith('teamMember_')).split('_')[1]);
+            const indexB = parseInt(Object.keys(b).find(key => key.startsWith('teamMember_')).split('_')[1]);
+            return indexA - indexB;
+        });
 
         // Prepare row data
         const rowData = [
