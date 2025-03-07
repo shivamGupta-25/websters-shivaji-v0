@@ -24,7 +24,7 @@ const Banner = () => {
   const easeOutCubic = [0.33, 1, 0.68, 1];
 
   return (
-    <section ref={ref} className="container px-8 mx-auto my-4 mb-12">
+    <section ref={ref} className="container px-8 mx-auto my-4 mb-12 overflow-hidden">
       <motion.div
         className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center text-center"
         initial="hidden"

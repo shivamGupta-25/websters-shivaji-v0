@@ -14,7 +14,7 @@ const About = () => {
     return (
         <section
             id="about"
-            className="flex items-center justify-center px-6 mb-12 md:px-12 lg:px-20 xl:px-32"
+            className="flex items-center justify-center px-6 mb-12 md:px-12 lg:px-20 xl:px-32 overflow-hidden"
             ref={ref}
         >
             <motion.div
