@@ -11,9 +11,9 @@ export default function Techelons() {
       <Header />
       <div className="min-h-screen">
         <TechelonsHero />
-        <hr className="h-px my-8 bg-gray-200 border-0 w-4/5 mx-auto shadow-sm" />
+        <hr className="h-px bg-gray-200 border-0 w-4/5 mx-auto shadow-sm" />
         <EventSchedule />
-        <hr className="h-px my-8 bg-gray-200 border-0 w-4/5 mx-auto shadow-sm" />
+        <hr className="h-px bg-gray-200 border-0 w-4/5 mx-auto shadow-sm" />
         <TechelonsEvents />
       </div>
       <Footer />

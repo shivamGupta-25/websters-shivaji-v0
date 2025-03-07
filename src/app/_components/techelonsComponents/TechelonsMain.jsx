@@ -8,6 +8,7 @@ const SplineScene = lazy(() =>
 
 const TechelonsMain = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [is3DLoaded, setIs3DLoaded] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -36,22 +37,31 @@ const TechelonsMain = () => {
     // window.open("/techelonsregistration", "_blank");
   };
 
+  // Handle 3D scene load completion
+  const handle3DLoad = () => {
+    console.log("3D scene loaded");
+    setIs3DLoaded(true);
+  };
+
   return (
     <section className="relative py-8 md:py-8 overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Top badge */}
         <div className="flex justify-center mb-6 md:mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-3 rounded-full bg-green-50 border border-green-200">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="text-green-600 font-bold text-sm md:text-md">Registration Open</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-3 rounded-full bg-red-50 border border-red-200">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            <span className="text-red-600 font-bold text-sm md:text-md">Registration Closed</span>
           </div>
         </div>
 
         {/* Main heading section */}
         <div className="text-center mb-8 md:mb-16">
+          <div className="inline-block relative">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 leading-none">
             Techelons'25
           </h1>
+          <div className="absolute -bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-blue-600/0 via-purple-600 to-indigo-600/0 blur-sm"></div>
+          </div>
           <p className="mt-4 md:mt-6 text-gray-700 text-base md:text-lg lg:text-xl max-w-2xl mx-auto">
             Shivaji College's premier technical festival, where innovation meets creativity.
           </p>
@@ -64,11 +74,11 @@ const TechelonsMain = () => {
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 md:p-8 shadow-xl border border-gray-100">
               <h2 className="text-xl md:text-2xl text-center font-bold text-gray-900 mb-3">About Techelons</h2>
               <p className="text-gray-600 text-sm md:text-base">
-                Techelons is the annual technical festival organized by Websters, the Computer Science Society of Shivaji College, University of Delhi. It serves as a dynamic platform for students to showcase their technical skills, creativity, and problem-solving abilities through a diverse range of competitions, hackathons, coding challenges, and interactive events.
+                Techelons is the annual tech fest by Websters, the CS Society of Shivaji College, DU. It's where students showcase technical skills through competitions, hackathons, and coding challenges.
               </p>
               <hr className="my-2" />
               <p className="text-gray-600 text-sm md:text-base">
-                Beyond competitions, Techelons also features insightful seminars conducted by industry experts, providing attendees with exposure to emerging technologies, innovative trends, and real-world applications. The fest fosters collaboration, learning, and networking among tech enthusiasts, professionals, and students, making it an exciting celebration of knowledge, innovation, and technological excellence.
+                Beyond competitions, Techelons features expert-led seminars on emerging tech and industry trends. The fest promotes networking and collaboration among students and professionals in a celebration of technological innovation.
               </p>
             </div>
             
@@ -100,19 +110,24 @@ const TechelonsMain = () => {
 
                 {/* 3D Scene Container */}
                 <div className="absolute inset-0">
-                  <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-white">Loading 3D scene...</div>}>
-                    <SplineScene
-                      scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                      className="w-full h-full"
-                    />
-                  </Suspense>
+                  {/* Using our enhanced loader with SplineScene */}
+                  <SplineScene
+                    scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                    className="w-full h-full"
+                    onLoad={handle3DLoad}
+                  />
                 </div>
 
-                {/* Text overlay */}
-                <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 z-20 pointer-events-none">
+                {/* Text overlay - Always visible regardless of 3D model loading state */}
+                <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 z-100 pointer-events-none">
                   <div className="text-white text-center">
                     <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">Tech<span className="text-blue-400">elons</span></div>
                     <div className="text-base md:text-lg lg:text-xl text-blue-200 mb-4 md:mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">April 2025</div>
+                    {!is3DLoaded && (
+                      <div className="text-xs md:text-sm bg-gradient-to-r from-blue-300 to-indigo-300 bg-clip-text text-transparent font-medium tracking-wide animate-pulse">
+                        Interactive 3D Experience Loading
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

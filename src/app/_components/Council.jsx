@@ -8,7 +8,7 @@ import { Autoplay, EffectCoverflow } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/autoplay";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { motion } from "framer-motion";
 
 // Move data outside component to prevent re-creation on each render
@@ -90,19 +90,31 @@ const swiperConfig = {
     }
 };
 
+// Animation variants for better performance
+const titleAnimation = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }
+    }
+};
+
 // Memoized MemberCard component to prevent unnecessary re-renders
 const MemberCard = memo(({ member }) => (
-    <Card className="overflow-hidden bg-white">
+    <Card className="overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
         <div className="relative w-full h-[380px]">
             <Image
                 src={member.image}
-                alt={member.name}
+                alt={`${member.name} - ${member.role}`}
                 className="object-cover"
                 width={300}
                 height={380}
                 style={{ width: '100%', height: '100%' }}
                 loading="lazy"
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                priority={false}
+                quality={85}
             />
         </div>
         <CardContent className="p-4 text-center">
@@ -117,7 +129,7 @@ const MemberCard = memo(({ member }) => (
                     href={member.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center text-blue-500"
+                    className="inline-flex items-center justify-center text-blue-500 hover:text-blue-700 transition-colors duration-200"
                     aria-label={`LinkedIn profile of ${member.name}`}
                 >
                     <Linkedin className="w-6 h-6" />
@@ -130,8 +142,21 @@ const MemberCard = memo(({ member }) => (
 MemberCard.displayName = 'MemberCard';
 
 const Council = () => {
+    // Memoize the slider content to prevent unnecessary re-renders
+    const renderSlides = useCallback(() =>
+        councilMembers.map((member, index) => (
+            <SwiperSlide key={index} className="h-auto">
+                <MemberCard member={member} />
+            </SwiperSlide>
+        )),
+        []);
+
     return (
-        <section id="council" className="mb-8 px-4 max-w-[1400px] mx-auto">
+        <section
+            id="council"
+            className="mb-8 px-4 max-w-[1400px] mx-auto overflow-hidden"
+            aria-labelledby="council-heading"
+        >
             <motion.h1
                 className="flex justify-center items-center text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8"
                 initial={{ opacity: 0, y: 50 }}
@@ -143,11 +168,7 @@ const Council = () => {
             </motion.h1>
 
             <Swiper {...swiperConfig} className="w-full">
-                {councilMembers.map((member, index) => (
-                    <SwiperSlide key={index} className="h-auto">
-                        <MemberCard member={member} />
-                    </SwiperSlide>
-                ))}
+                {renderSlides()}
             </Swiper>
         </section>
     );

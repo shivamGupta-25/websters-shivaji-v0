@@ -142,6 +142,8 @@ const Header = ({ children }) => {
     // Navigation to registration page
     const handleExit = useCallback(() => {
         router.push("/registrationclosed");
+        // window.open("/workshopregistration", "_blank");
+        // window.open("/techelonsregistration", "_blank");
     }, [router]);
 
     // Handle section scrolling on page load
@@ -180,9 +182,22 @@ const Header = ({ children }) => {
     // Lock body scroll when mobile menu is open
     useEffect(() => {
         if (mobileMenuOpen) {
-            document.body.style.overflow = 'hidden';
+            // Save the current scroll position
+            const scrollY = window.scrollY;
+            // Add padding to prevent layout shift
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+            document.body.style.paddingRight = `${scrollbarWidth}px`;
+            
             return () => {
-                document.body.style.overflow = '';
+                // Restore scroll position when menu closes
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                document.body.style.paddingRight = '';
+                window.scrollTo(0, scrollY);
             };
         }
     }, [mobileMenuOpen]);
@@ -285,14 +300,14 @@ const Header = ({ children }) => {
             </header>
 
             {/* Mobile Menu Dialog - Improved Animation */}
-            <AnimatePresence>
+            <AnimatePresence mode="sync">
                 {mobileMenuOpen && (
                     <Dialog
+                        as={motion.div}
                         static
-                        as="div"
                         open={mobileMenuOpen}
                         onClose={() => setMobileMenuOpen(false)}
-                        className="fixed inset-0 z-50"
+                        className="fixed inset-0 z-50 isolate"
                         id="mobile-menu"
                     >
                         {/* Backdrop */}
@@ -300,8 +315,11 @@ const Header = ({ children }) => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 0.5 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="fixed inset-0 bg-gray-900 backdrop-blur-sm"
+                            transition={{ 
+                                duration: 0.2,
+                                ease: "linear"
+                            }}
+                            className="fixed inset-0 bg-gray-900"
                             onClick={() => setMobileMenuOpen(false)}
                             aria-hidden="true"
                         />
@@ -313,12 +331,10 @@ const Header = ({ children }) => {
                                 animate={{ x: 0 }}
                                 exit={{ x: '100%' }}
                                 transition={{
-                                    type: "spring",
-                                    stiffness: 300,
-                                    damping: 30,
-                                    mass: 1
+                                    duration: 0.2,
+                                    ease: "easeOut"
                                 }}
-                                className="w-64 sm:w-72 bg-white px-6 py-6 shadow-lg overflow-y-auto pointer-events-auto"
+                                className="w-64 sm:w-72 bg-white px-6 py-6 shadow-lg overflow-y-auto pointer-events-auto will-change-transform"
                             >
                                 <div className="flex items-center justify-between">
                                     <a
@@ -344,12 +360,7 @@ const Header = ({ children }) => {
 
                                 <nav className="mt-6 space-y-4">
                                     {NAV_LINKS.map((link, index) => (
-                                        <motion.div
-                                            key={link.name}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            transition={{ delay: 0.1 + index * 0.05 }}
-                                        >
+                                        <div key={link.name} className="transform-gpu">
                                             <NavLink
                                                 href={link.href}
                                                 name={link.name}
@@ -357,21 +368,17 @@ const Header = ({ children }) => {
                                                 className={STYLES.mobileLink}
                                                 isCurrent={pathname === link.href || (link.href.includes('#') && pathname === '/')}
                                             />
-                                        </motion.div>
+                                        </div>
                                     ))}
                                     <hr className="border-gray-300 my-4" />
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: 0.4 }}
-                                    >
+                                    <div className="transform-gpu">
                                         <button
                                             className={STYLES.mobileRegisterButton}
                                             onClick={handleExit}
                                         >
                                             Register Now
                                         </button>
-                                    </motion.div>
+                                    </div>
                                 </nav>
                             </motion.div>
                         </div>

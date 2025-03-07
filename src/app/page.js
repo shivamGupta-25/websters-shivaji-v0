@@ -2,7 +2,6 @@
 
 // without loading Screen
 
-{/* <>
 import { useCallback, useState, useEffect, memo } from "react";
 import Header from "./_components/Header";
 import Footer from "./_components/Footer";
@@ -91,7 +90,7 @@ export default function Home() {
   );
 }
 
-</> */}
+{/* <>
 
 // with loading screen
 
@@ -511,3 +510,5 @@ export default function Home() {
 
   return <MainContent scrollY={scrollY} />;
 }
+
+</> */}

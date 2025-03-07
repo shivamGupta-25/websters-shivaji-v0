@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCards, Autoplay } from "swiper/modules";
 import Image from "next/image";
@@ -30,49 +30,45 @@ const PastEvent = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Memoized handler with useCallback
+  const handleResize = useCallback(() => {
+    setIsMobile(window.innerWidth < 640);
+  }, []);
+
+  // Debounced resize with useCallback
+  const debouncedResize = useCallback(() => {
+    let timeoutId;
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(handleResize, 150);
+    return () => clearTimeout(timeoutId);
+  }, [handleResize]);
+
   useEffect(() => {
     setIsMounted(true);
-
-    // Simpler resize handler with debounce
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-
+    
     // Set initial state
     handleResize();
-
-    // Debounced event listener for better performance
-    let timeoutId;
-    const debouncedResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleResize, 150);
-    };
 
     window.addEventListener('resize', debouncedResize);
 
     // Clean up
     return () => {
       window.removeEventListener('resize', debouncedResize);
-      clearTimeout(timeoutId);
     };
-  }, []);
+  }, [handleResize, debouncedResize]);
 
-  // Animation config is unchanged
-  const animationConfig = {
-    initial: { opacity: 0, y: 50 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, amount: 0.3 },
-    transition: {
-      duration: 0.8,
-      ease: [0.25, 0.1, 0.25, 1]
-    }
-  };
-
-  // Simplified autoplay config
-  const getAutoplayConfig = () => ({
+  // Memoized autoplay config
+  const autoplayConfig = useMemo(() => ({
     delay: isMobile ? 2500 : 3000,
     disableOnInteraction: isMobile
-  });
+  }), [isMobile]);
+
+  // Memoized cards effect config
+  const cardsEffectConfig = useMemo(() => ({
+    slideShadows: false,
+    perSlideOffset: 8,
+    perSlideRotate: 2,
+  }), []);
 
   // Only render content client-side to prevent hydration issues
   if (!isMounted) return null;
@@ -80,7 +76,7 @@ const PastEvent = () => {
   return (
     <section
       id="pastevent"
-      className="mb-1 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+      className="mb-8 sm:py-16 md:py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
     >
       <motion.h1
         className="flex justify-center items-center text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8"
@@ -99,13 +95,9 @@ const PastEvent = () => {
           modules={[EffectCards, Autoplay]}
           className="w-full max-w-[280px] xs:max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl aspect-[16/9] rounded-lg shadow-xl"
           loop={true}
-          autoplay={getAutoplayConfig()}
+          autoplay={autoplayConfig}
           speed={800}
-          cardsEffect={{
-            slideShadows: false,
-            perSlideOffset: 8,
-            perSlideRotate: 2,
-          }}
+          cardsEffect={cardsEffectConfig}
         >
           {SLIDES.map((slide, index) => (
             <SwiperSlide key={slide.title} className="rounded-xl shadow-lg overflow-hidden bg-gray-800">
@@ -116,8 +108,8 @@ const PastEvent = () => {
                   fill
                   className="object-cover"
                   sizes="(max-width: 480px) 280px, (max-width: 640px) 320px, (max-width: 768px) 384px, (max-width: 1024px) 448px, 576px"
-                  priority={index < 3}
-                  loading={index < 3 ? "eager" : "lazy"}
+                  priority={index < 2} // Only prioritize the first two images
+                  loading={index < 2 ? "eager" : "lazy"}
                   placeholder="blur"
                   blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjQ3NSIgdmlld0JveD0iMCAwIDcwMCA0NzUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzMzMzMzMyIgLz4KPC9zdmc+"
                 />
@@ -144,4 +136,5 @@ const PastEvent = () => {
   );
 };
 
+// Use React.memo for the entire component to prevent unnecessary re-renders
 export default PastEvent;
