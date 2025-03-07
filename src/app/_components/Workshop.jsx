@@ -34,7 +34,7 @@ const Workshop = () => {
   return (
     <section
       id="workshop"
-      className="container mx-auto mb-8 px-4 sm:px-6 lg:px-8 mt-8 flex flex-col items-center justify-center overflow-hidden"
+      className="container p-12 mx-auto mb-8 px-4 sm:px-6 lg:px-8 mt-8 flex flex-col items-center justify-center overflow-hidden"
     >
       <motion.h1
         className="text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8"
@@ -46,7 +46,7 @@ const Workshop = () => {
         Workshop
       </motion.h1>
 
-      <div className="w-full max-w-4xl bg-white dark:bg-gray-900 shadow-2xl rounded-2xl overflow-hidden">
+      <div className="w-full max-w-4xl bg-white dark:bg-gray-900 shadow-[0_10px_30px_rgba(0,0,0,0.25)] rounded-2xl overflow-hidden">
         <div className="relative w-full aspect-video">
           <Image
             src="/assets/Events/UI-UX_Workshop.png"
