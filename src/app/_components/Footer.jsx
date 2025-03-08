@@ -42,7 +42,7 @@ const Footer = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
-            className="mt-8 bg-gradient-to-b from-gray-900 to-black text-gray-300 py-10"
+            className="bg-gradient-to-b from-gray-900 to-black text-gray-300 py-10"
         >
             <div className="container mx-auto px-6 lg:px-20 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
                 <motion.div variants={fadeInUp} className="flex-shrink-0 flex justify-center md:justify-start">

@@ -394,7 +394,7 @@ export default function RegistrationPage() {
                   <Select onValueChange={(value) => {
                     setValue("college", value);
                     if (value === "Shivaji College") {
-                      toast('Welcome, Shivaji College student!', {
+                      toast('Shivaji College student!', {
                         icon: '🏫',
                         duration: 2000
                       });
